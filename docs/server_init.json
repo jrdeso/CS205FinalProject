@@ -1,0 +1,51 @@
+{
+    "auth_code": "",
+    "role": "",
+    "map": {
+        "0": {
+            "type": "path_start",
+            "coord": [0.0, 0.05],
+            "edges": [
+                ["1"]
+            ]
+        },
+        "1": {
+            "type": "path",
+            "coord": [0.1, 0.15],
+            "edges": [
+                ["2"]
+            ]
+        },
+        "2": {
+            "type": "path",
+            "coord": [0.3, 0.1],
+            "edges": [
+                ["5"]
+            ]
+        },
+        "3": {
+            "type": "path_start",
+            "coord": [0.0, 0.4],
+            "edges": [
+                ["4"]
+            ]
+        },
+        "4": {
+            "type": "path",
+            "coord": [0.4, 0.35],
+            "edges": [
+                ["2"]
+            ]
+        },
+        "5": {
+            "type": "path_end",
+            "coord": [0.6, 0.2],
+            "edges": []
+        },
+        "6": {
+            "type": "tower",
+            "coord": [0.0, 0.1],
+            "edges": []
+        }
+    }
+}
