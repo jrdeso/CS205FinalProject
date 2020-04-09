@@ -1,9 +1,9 @@
 import unittest
 
-from ..util.buffer import SequenceBuffer
+from ..network.buffer import SequenceBuffer
 
 
-class TestResources(unittest.TestCase):
+class TestBuffer(unittest.TestCase):
     def setUp(self):
         self.max_length = 32
         self.seq_buffer = SequenceBuffer(self.max_length)

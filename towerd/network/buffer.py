@@ -1,3 +1,13 @@
+import dataclasses
+
+
+@dataclasses.dataclass
+class SequenceData:
+    seq: int = 0
+    time: float = 0
+    acked: bool = False
+
+
 class SequenceBuffer:
     def __init__(self, max_length):
         self.buf = list((0,) * max_length)

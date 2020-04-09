@@ -4,11 +4,21 @@ import enum
 import struct
 
 
-def generate_ack_bits(packet_buf, seq):
-    ack = len(packet_buf) - 1
+def generate_ack_bits(seq_buf, ack):
+    """
+    Construct a bitset indicating whether or not a packet was acked.
+
+    Attributes
+    ----------
+    seq_buf : towerd.network.buffer.SequenceBuffer
+        a buffer of sequence data
+    ack : int
+        the sequence id of the packet to be acked
+    """
     ack_bits = 0
-    for i in range(ack):
-        if not packet_buf[i].acked:
+    for i in range(32):
+        seq = ack - i
+        if seq_buf[seq].seq == seq and seq_buf[seq].acked:
             ack_bits |= 1 << i
     return ack_bits
 
@@ -55,15 +65,18 @@ class AckPacket(Packet):
     """
     STATIC_SIZE = 10
 
-    ack: int
-    n_slices: int
+    ack: int = 0
+    n_slices: int = 0
     ack_bits: int = 0
+
+    def __post_init__(self):
+        super().__init__()
 
     def size(self):
         return AckPacket.STATIC_SIZE
 
     def serialize(self):
-        return struct.pack('HHHI', self.size(), self.seq, self.ack, self.ack_bits)
+        return struct.pack('<HHHI', self.size(), self.seq, self.ack, self.ack_bits)
 
 
 @dataclasses.dataclass
@@ -85,11 +98,14 @@ class DataPacket(Packet):
     slice_id: int
     data: str
 
+    def __post_init__(self):
+        super().__init__()
+
     def size(self):
         return DataPacket.STATIC_SIZE + len(self.data)
 
     def serialize(self):
-        return struct.pack('HHs', self.size(), self.seq, self.data)
+        return struct.pack('<HH', self.size(), self.seq) + self.data.encode('ascii')
 
 
 class PacketType(enum.Enum):
@@ -102,11 +118,11 @@ class PacketFactory:
         self.max_packet_size = max_packet_size
 
     def create_packet(self, packet_type, *args, **kwargs):
-        if packet_type == 0:
+        if packet_type == PacketType.DATA:
             dp = DataPacket(*args, **kwargs)
             if DataPacket.STATIC_SIZE + len(dp.data) >= self.max_packet_size:
                 max_data_size = self.max_packet_size - DataPacket.STATIC_SIZE
                 raise ValueError(f'Payload too large: len(load) > {max_data_size}')
             return dp
-        elif packet_type == 1:
+        elif packet_type == PacketType.ACK:
             return AckPacket(*args, **kwargs)
