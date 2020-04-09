@@ -7,20 +7,19 @@ Built through an adjacency list representation containing each node with
 - coordinates
 - edge
 """
+from Node import Node
 
-import Node
 
 class Map:
     def __init__(self):
         """
         Default constructor initializes map adjacency list
         """
-        self.map = []
+        self.map = dict()
 
-    def addNode(self, id, type, coordinates, edges):
+    def addNode(self, type, coordinates, edges):
         """
-        Add a note to map list
-        :param id: id of node
+        Add a note to map list - ID incremented in node class
         :param type: type of node
                         path_start: where mobs appear
                         path_end: end where mob deals damage to player
@@ -29,8 +28,8 @@ class Map:
         :param coordinates: where node is located in x,y system (range of [0, 1])
         :param edges: adjacent nodes
         """
-        node = [id, type, coordinates, edges]
-        self.map.append(node)
+        n = Node()
+        self.map[n] = [type, coordinates, edges]
 
     def getMap(self):
         """
@@ -39,15 +38,17 @@ class Map:
         """
         return self.map
 
-    def getRequestedNode(self, id):
-        """
-        get details of a requested node based off a searched for ID. Can be used to find details of end node/ start node
-        :param id: ID being searched for within the map
-        :return: return details of the node (id, type, coordinates, edges)
-                    Note: if node DNE return -1
-        """
+    def __str__(self):
+        s = ""
         for i in self.map:
-            if id == self.map[i][0]:
-                return self.map[i]
+            s += str(i) + " | Type: " + str(self.map[i][0]) + " | Coordinates: " + str(self.map[i][1]) + " | Edges: " +\
+                 str(self.map[i][2])
 
-        return -1
+        return s
+
+
+# tests
+m = Map()
+m.addNode("start", [0, .1], ['a', 'b'])
+
+print(m)
