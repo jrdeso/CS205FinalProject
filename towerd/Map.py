@@ -8,6 +8,7 @@ Built through an adjacency list representation containing each node with
 - edge
 """
 
+import Node
 
 class Map:
     def __init__(self):
