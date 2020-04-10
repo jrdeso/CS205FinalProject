@@ -21,38 +21,38 @@ class Resources:
     print(resources.text['test1'])  # in case an identifier contains a space
     """
 
-    def __init__(self, filepath, gather_from_dir=False):
-        self.path_dir = os.path.dirname(filepath)
+    def __init__(self, filepath, gatherFromDir=False):
+        self.pathDir = os.path.dirname(filepath)
         with open(filepath) as f:
             mapping = "".join([line.strip() for line in f.readlines()])
-        self._add_mapping(mapping)
+        self._addMapping(mapping)
 
-        if gather_from_dir:
+        if gatherFromDir:
             self._gather()
 
-    def _add_mapping(self, mapping):
+    def _addMapping(self, mapping):
         try:
             resources = json.loads(mapping)
         except json.JSONDecodeError:
             warnings.warn(
-                "No resources found. Try again with Resources._add_mapping(mapping)."
+                "No resources found. Try again with Resources._addMapping(mapping)."
             )
             resources = []
 
         for resource in resources:
             _, category = resource.keys()
-            category_dict = getattr(self, category, None)
+            categoryDict = getattr(self, category, None)
 
-            if not category_dict:
+            if not categoryDict:
                 setattr(self, category, ResourceNamespace())
-                category_dict = getattr(self, category)
+                categoryDict = getattr(self, category)
 
             reference = resource[category]
-            category_dict[reference] = os.path.join(self.path_dir, resource["path"])
+            categoryDict[reference] = os.path.join(self.pathDir, resource["path"])
 
     def _gather(self):
         contents = {}
-        walker = os.walk(self.path_dir)
+        walker = os.walk(self.pathDir)
         for (dirpath, dirnames, filenames) in walker:
             for filename in filenames:
                 if contents.get(filename, None) is None:
