@@ -8,7 +8,7 @@ Built through an adjacency list representation containing each node with
 - edge
 """
 import enum
-
+import json
 
 class PathType(enum.Enum):
     PATH_START = 0
@@ -53,7 +53,27 @@ class Map:
         self.nodes = {}
 
     def _generateMapFromJSON(self, map_json):
-        pass
+        """
+        Method initially called from default constructor that initializes map dictionary from
+        javascript
+        :param map_json: map being loaded into class
+        :return generated map to go into map variable
+        """
+        # Create m object that will return to map var
+        m = Map()
+        for i in map_json:  # Cycle through map_json
+            c = 0
+            for j in map_json[i]:
+                if c == 0:
+                    pathType = map_json[i][j]   # obtain pathType of id
+                if c == 1:
+                    coordx = map_json[i][j][0]  # obtain x, y coordinates of id
+                    coordy = map_json[i][j][1]
+                c += 1
+
+            m.addNode(pathType, coordx, coordy)  # add node to temp m
+
+        return m.getMap()  # return map obtained for gen map
 
     def __str__(self):
         """
