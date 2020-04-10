@@ -1,6 +1,7 @@
 """
-Node class used to represent a node within adj list in map class
-
+Node class used to represent a node within the dictionary of map
+in map class
+- creates ID of node
 """
 
 

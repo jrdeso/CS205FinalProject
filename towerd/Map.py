@@ -13,7 +13,9 @@ from Node import Node
 class Map:
     def __init__(self):
         """
-        Default constructor initializes map adjacency list
+        Default constructor initializes map dictionary
+        Key = ID
+        ID : [type, coordinates, edge nodes]
         """
         self.map = dict()
 
@@ -34,21 +36,27 @@ class Map:
     def getMap(self):
         """
         Method to retrieve adjacency list containing map
-        :return: map of nodes and coordinates
+        :return: map of nodes sub information about node
         """
         return self.map
 
     def __str__(self):
+        """
+        To String method to display the map
+        :return: Returns a string displaying all nodes located within the map
+        """
         s = ""
         for i in self.map:
             s += str(i) + " | Type: " + str(self.map[i][0]) + " | Coordinates: " + str(self.map[i][1]) + " | Edges: " +\
-                 str(self.map[i][2])
+                 str(self.map[i][2]) + "\n"
 
         return s
 
 
-# tests
+# Code tests
 m = Map()
 m.addNode("start", [0, .1], ['a', 'b'])
-
+m.addNode("Path", [.1, .1], ['b', 'c'])
+m.addNode("End", [.1, .2], ['c', 'd'])
+# Displays all contents of map
 print(m)
