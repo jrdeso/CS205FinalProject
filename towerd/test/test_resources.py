@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from ..client.resources import Resources
+from ..Resources import Resources
 
 
 class TestResources(unittest.TestCase):
@@ -28,15 +28,15 @@ class TestResources(unittest.TestCase):
 
         self.assertEqual(
             resources.sound.arrow1,
-            os.path.join(resources.path_dir, "assets/sound/arrow1.mp4"),
+            os.path.join(resources.pathDir, "assets/sound/arrow1.mp4"),
         )
         self.assertEqual(
             resources.image.archer_tower,
-            os.path.join(resources.path_dir, "assets/image/tower1.png"),
+            os.path.join(resources.pathDir, "assets/image/tower1.png"),
         )
 
     def test_gather(self):
-        resources = Resources(TestResources.tmp_resource, gather_from_dir=True)
+        resources = Resources(TestResources.tmp_resource, gatherFromDir=True)
 
         tmp_files = [
             TestResources.tmp_tmp1,
