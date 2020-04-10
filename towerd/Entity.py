@@ -2,8 +2,7 @@ import collections
 import dataclasses
 
 
-
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Entity:
     e_id: int
 
