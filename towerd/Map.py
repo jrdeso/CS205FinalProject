@@ -50,25 +50,10 @@ class Map:
             self.map = self._generateMapFromJSON(map_json)
         else:
             self.map = {}
+        self.nodes = {}
 
     def _generateMapFromJSON(self, map_json):
         pass
-
-    def addNode(self, pathType, x, y):
-        """
-        Add a note to map list - ID incremented in node class
-        :param pathType: type of node
-                        path_start: where mobs appear
-                        path_end: end where mob deals damage to player
-                        path: normal travel path
-                        tower: where a tower can be placed
-        :param x: where node is located in x axis (range of [0, 1])
-        :param y: where node is located in y axis (range of [0, 1])
-        :param edges: adjacent nodes
-        """
-        n = MapNode(pathType, x, y)
-        self.map[n] = []
-        return n
 
     def __str__(self):
         """
@@ -80,20 +65,42 @@ class Map:
             s.append(f'{node} | Type: {node.pathType} | Coordinates: ({node.x}, {node.y}) | Edges: {edges}')
         return '\n'.join(s)
 
+    def addNode(self, pathType, x, y):
+        """
+        Add a note to map list
+        :param pathType: type of node
+                        path_start: where mobs appear
+                        path_end: end where mob deals damage to player
+                        path: normal travel path
+                        tower: where a tower can be placed
+        :param x: where node is located in x axis (range of [0, 1])
+        :param y: where node is located in y axis (range of [0, 1])
+        :param edges: adjacent nodes
+        """
+        n = MapNode(pathType, x, y)
+        self.map[n.id] = []
+        self.nodes[n.id] = n
+        return n
+
     def addEdge(self, node, target):
         """
         Add a directed edge between two nodes.
-        :param node: The starting node
-        :param target: The end node
+        :param node: The starting node or node id
+        :param target: The end node or node id
         """
-        self.map[node].append(target)
+        node = node.id if isinstance(node, MapNode) else node
+        target = target.id if isinstance(target, MapNode) else target
+        if target not in self.map[node]:
+            self.map[node].append(target)
 
     def existsEdge(self, node, target):
         """
         Check if a directed edge exists between two nodes.
-        :param node: The starting node
-        :param target: The end node
+        :param node: The starting node or node id
+        :param target: The end node or node id
         """
+        node = node.id if isinstance(node, MapNode) else node
+        target = target.id if isinstance(target, MapNode) else target
         return target in self.map[node]
 
     def getMap(self):
