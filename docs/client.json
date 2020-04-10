@@ -1,9 +1,0 @@
-{
-    "auth_code": "1234",
-    "game_time": "0",
-    "event": {
-        "target_id": "123",
-        "action_type": "upgrade",
-        "action_parameter": ""
-    }
-}
