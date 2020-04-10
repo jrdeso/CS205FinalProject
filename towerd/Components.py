@@ -63,8 +63,8 @@ class Vital:
 @dataclasses.dataclass
 class Movement:
     movement_speed: float
-    from_pos: int
-    target_pos: int
+    from_node: int
+    dest_node: int
 
 
 @dataclasses.dataclass
