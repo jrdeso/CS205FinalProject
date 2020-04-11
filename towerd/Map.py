@@ -8,13 +8,32 @@ Built through an adjacency list representation containing each node with
 - edge
 """
 import enum
-import json
 
-class PathType(enum.Enum):
-    PATH_START = 0
-    PATH_END = 1
-    PATH = 2
-    TOWER = 3
+
+class PathType(enum.IntEnum):
+    PATH_START = enum.auto()
+    PATH_END = enum.auto()
+    PATH = enum.auto()
+    TOWER = enum.auto()
+
+    @staticmethod
+    def GetEnum(s):
+        """
+        Take a string of and get the
+        respective enum.
+
+        :param s: a string of either 'path_start', 'path', 'tower', 'path_end'
+        :return: the enum corresponding to the string or -1
+        """
+        if s == 'path_start':
+            return PathType.PATH_START
+        elif s == 'path_end':
+            return PathType.PATH_END
+        elif s == 'path':
+            return PathType.PATH
+        elif s == 'tower':
+            return PathType.TOWER
+        return -1
 
 
 class MapNode:
@@ -46,27 +65,18 @@ class Map:
     :param map_json: a structure read from json
     """
     def __init__(self, map_json=None):
+        self.nodes = {}
         if map_json:
-            self.map = self._generateMapFromJSON(map_json)
+            self.map = {}
+            for key in map_json:
+                pathType, coords, edges = map_json[key].values()
+                pathType = PathType.GetEnum(pathType)
+                tempNode = self.addNode(pathType, coords[0], coords[1])
+
+                for edge in edges:
+                    self.addEdge(tempNode, edge)
         else:
             self.map = {}
-        self.nodes = {}
-
-    def _generateMapFromJSON(self, map_json):
-        """
-        Method initially called from default constructor that initializes map dictionary from
-        javascript
-        :param map_json: map being loaded into class
-        :return generated map to go into map variable
-        """
-        tempMap = Map()
-        for key in map_json:
-            pathType, coords, edges = map_json[key].values()
-            tempNode = tempMap.addNode(pathType, coords[0], coords[1])
-            tempMap.addEdge(tempNode, edges)
-            # print(pathType, coords, edges)  # - Used to Test code
-
-        return tempMap.getMap()
 
     def __str__(self):
         """
