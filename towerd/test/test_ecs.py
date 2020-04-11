@@ -1,7 +1,10 @@
 import unittest
 
 from ..Entity import EntityManager
-from ..Component import ComponentManager, LocationCartesian, Movement, Vital
+from ..Component import ComponentManager
+from ..component.LocationCartesian import LocationCartesian
+from ..component.Movement import Movement
+from ..component.Vital import Vital
 from ..System import SystemManager
 from ..system.MovementSystem import MovementSystem
 from ..Map import Map, PathType

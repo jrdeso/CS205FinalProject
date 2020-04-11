@@ -1,6 +1,3 @@
-import dataclasses
-
-from towerd.Entity import Entity
 from towerd.util.PackedArray import MappedPackedArray
 
 
@@ -82,46 +79,3 @@ class ComponentManager:
                 arr.removeKey(entity.ID)
             except KeyError:
                 continue
-
-
-@dataclasses.dataclass
-class LocationNode:
-    node: int
-
-
-@dataclasses.dataclass
-class LocationCartesian:
-    x: int
-    y: int
-
-
-@dataclasses.dataclass
-class Level:
-    level: int
-    upgradeCost: int
-
-
-@dataclasses.dataclass
-class Vital:
-    health: int
-    shield: int
-
-
-@dataclasses.dataclass
-class Movement:
-    speed: float
-    fromNode: int
-    destNode: int
-
-
-@dataclasses.dataclass
-class Attack:
-    attackRange: float
-    attackSpeed: float
-    dmg: float
-    target: Entity
-
-
-@dataclasses.dataclass
-class Coin:
-    value: int
