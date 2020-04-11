@@ -97,6 +97,15 @@ class SystemManager:
         """
         return self.systems[T.__name__]
 
+    def remove_system_entity(self, T, entity):
+        """
+        Remove an entity from a registered System.
+
+        :param T: the System class
+        :param entity: the entity to remove
+        """
+        self.systems[T.__name__].entities.discard(entity)
+
     def remove_all_entity(self, entity):
         """
         Remove an entity from all systems.

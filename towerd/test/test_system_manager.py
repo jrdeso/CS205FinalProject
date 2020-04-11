@@ -23,5 +23,5 @@ class TestSystemManager(unittest.TestCase):
         self.sm.update_system_entity(ent, 33)
         self.assertEqual(len(ms.entities), 1)
 
-        self.sm.remove_system_entity(ent)
+        self.sm.remove_system_entity(MovementSystem, ent)
         self.assertEqual(len(ms.entities), 0)
