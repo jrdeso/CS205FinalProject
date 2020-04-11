@@ -1,7 +1,7 @@
 import unittest
 
 from ..Entity import Entity
-from ..Components import ComponentManager, LocationCartesian, Vital
+from ..Component import ComponentManager, LocationCartesian, Vital
 
 
 class TestComponentManager(unittest.TestCase):
