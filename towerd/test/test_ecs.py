@@ -8,22 +8,6 @@ from ..Map import Map, PathType
 
 class TestECS(unittest.TestCase):
     def setUp(self):
-        self.em = EntityManager(5)
-
-        self.cm = ComponentManager(5)
-        self.cm.register(LocCartesian)
-        self.cm.register(Movement)
-        self.cm.register(Vital)
-
-        loc_cartesian_bits = self.cm.get_component_bits(LocCartesian)
-        movement_bits = self.cm.get_component_bits(Movement)
-        vital_bits = self.cm.get_component_bits(Vital)
-
-        mob_bits = loc_cartesian_bits | movement_bits | vital_bits
-
-        self.sm = SystemManager()
-        self.sm.register(MovementSystem, loc_cartesian_bits | movement_bits)
-
         self.map = Map()
         n1 = self.map.addNode(PathType.PATH_START, 0.15, 0.2)
         n2 = self.map.addNode(PathType.PATH_END, 0.9, 0.2)
@@ -32,6 +16,19 @@ class TestECS(unittest.TestCase):
         self.state = {}
         self.state['map'] = self.map
         self.state['entities'] = {}
+
+        # Initial ECS setup
+        self.em = EntityManager(5)
+
+        self.cm = ComponentManager(5)
+        self.cm.register(LocCartesian)
+        self.cm.register(Movement)
+        self.cm.register(Vital)
+
+        mob_bits = self.cm.get_component_bits(LocCartesian, Movement, Vital)
+
+        self.sm = SystemManager()
+        self.sm.register(MovementSystem, mob_bits)
 
         # Make mobs
         self.orig_coords = [(0.15, 0.2)]
@@ -51,7 +48,7 @@ class TestECS(unittest.TestCase):
             self.sm.update_system_entity(ent, mob_bits)
 
     def test_ecs(self):
-        ms = self.sm.systems[MovementSystem.__name__]
+        ms = self.sm.get_system(MovementSystem)
         ms.update(1, self.state, self.cm.get_component_arr(Movement),
                   self.cm.get_component_arr(LocCartesian))
 
@@ -65,5 +62,5 @@ class TestECS(unittest.TestCase):
         movement0 = movements[e0.e_id]
 
         orig_coords0 = self.orig_coords[0]
-        self.assertEquals(loc_comp0.x, orig_coords0[0] + movement0.movement_speed)
-        self.assertEquals(loc_comp0.y, orig_coords0[1])
+        self.assertEqual(loc_comp0.x, orig_coords0[0] + movement0.movement_speed)
+        self.assertEqual(loc_comp0.y, orig_coords0[1])

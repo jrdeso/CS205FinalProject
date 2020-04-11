@@ -18,10 +18,10 @@ class TestSystemManager(unittest.TestCase):
         ent = Entity(1)
 
         self.sm.update_system_entity(ent, 10)
-        self.assertEquals(len(ms.entities), 0)
+        self.assertEqual(len(ms.entities), 0)
 
         self.sm.update_system_entity(ent, 33)
-        self.assertEquals(len(ms.entities), 1)
+        self.assertEqual(len(ms.entities), 1)
 
         self.sm.remove_system_entity(ent)
-        self.assertEquals(len(ms.entities), 0)
+        self.assertEqual(len(ms.entities), 0)

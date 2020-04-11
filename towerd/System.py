@@ -60,6 +60,9 @@ class SystemManager:
         self.systems[T.__name__] = T()
         self.system_bits[T.__name__] = bitset
 
+    def get_system(self, T):
+        return self.systems[T.__name__]
+
     def remove_system_entity(self, entity):
         for system in self.systems.values():
             system.entities.discard(entity)

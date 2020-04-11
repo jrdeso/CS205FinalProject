@@ -14,9 +14,12 @@ class ComponentManager:
         self.components[T.__name__] = len(self.component_arrs)
         self.component_arrs.append(MappedPackedArray(self.max_entities))
 
-    def get_component_bits(self, T):
-        bitshift = self.components[T.__name__]
-        return 1 << bitshift
+    def get_component_bits(self, *Ts):
+        component_bits = 0
+        for T in Ts:
+            bitshift = self.components[T.__name__]
+            component_bits |= 1 << bitshift
+        return component_bits
 
     def get_component_arr(self, T):
         return self.component_arrs[self.components[T.__name__]]
