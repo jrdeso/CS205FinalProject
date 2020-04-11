@@ -25,13 +25,13 @@ class PathType(enum.IntEnum):
         :param s: a string of either 'path_start', 'path', 'tower', 'path_end'
         :return: the enum corresponding to the string or -1
         """
-        if s == 'path_start':
+        if s == "path_start":
             return PathType.PATH_START
-        elif s == 'path_end':
+        elif s == "path_end":
             return PathType.PATH_END
-        elif s == 'path':
+        elif s == "path":
             return PathType.PATH
-        elif s == 'tower':
+        elif s == "tower":
             return PathType.TOWER
         return -1
 
@@ -56,7 +56,7 @@ class MapNode:
         To string method for node class
         :return: ID # of object
         """
-        return f'ID: {self.id}'
+        return f"ID: {self.id}"
 
 
 class Map:
@@ -64,6 +64,7 @@ class Map:
     A graph representation of the game map.
     :param map_json: a structure read from json
     """
+
     def __init__(self, map_json=None):
         self.nodes = {}
         if map_json:
@@ -85,8 +86,10 @@ class Map:
         """
         s = []
         for node, edges in self.map:
-            s.append(f'{node} | Type: {node.pathType} | Coordinates: ({node.x}, {node.y}) | Edges: {edges}')
-        return '\n'.join(s)
+            s.append(
+                f"{node} | Type: {node.pathType} | Coordinates: ({node.x}, {node.y}) | Edges: {edges}"
+            )
+        return "\n".join(s)
 
     def addNode(self, pathType, x, y):
         """
