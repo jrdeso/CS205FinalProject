@@ -19,7 +19,7 @@ class TestMap(unittest.TestCase):
         self.assertFalse(m.existsEdge(n1, n2))
 
     def test_generate(self):
-        jsonstr = '{"0":{"type":"path_start","coord":[0.0,0.05],"edges":["1"]},"1":{"type":"path_end","coord":[0.1,0.15],"edges":[]}}'
+        jsonstr = '{"0":{"type":"path_start","coord":[0.0,0.05],"edges":[1]},"1":{"type":"path_end","coord":[0.1,0.15],"edges":[]}}'
         map_json = json.loads(jsonstr)
 
         m = Map(map_json=map_json)
