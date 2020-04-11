@@ -59,21 +59,14 @@ class Map:
         :param map_json: map being loaded into class
         :return generated map to go into map variable
         """
-        # Create m object that will return to map var
-        m = Map()
-        for i in map_json:  # Cycle through map_json
-            c = 0
-            for j in map_json[i]:
-                if c == 0:
-                    pathType = map_json[i][j]   # obtain pathType of id
-                if c == 1:
-                    coordx = map_json[i][j][0]  # obtain x, y coordinates of id
-                    coordy = map_json[i][j][1]
-                c += 1
+        tempMap = Map()
+        for key in map_json:
+            pathType, coords, edges = map_json[key].values()
+            tempNode = tempMap.addNode(pathType, coords[0], coords[1])
+            tempMap.addEdge(tempNode, edges)
+            # print(pathType, coords, edges)  # - Used to Test code
 
-            m.addNode(pathType, coordx, coordy)  # add node to temp m
-
-        return m.getMap()  # return map obtained for gen map
+        return tempMap.getMap()
 
     def __str__(self):
         """
