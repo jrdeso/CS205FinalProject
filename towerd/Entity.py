@@ -4,26 +4,26 @@ import dataclasses
 
 @dataclasses.dataclass(frozen=True)
 class Entity:
-    e_id: int
+    ID: int
 
 
 class EntityManager:
-    def __init__(self, max_entities):
-        self.available = collections.deque(range(max_entities))
-        self.bitsets = list((None,) * max_entities)
-        self.n_active = 0
+    def __init__(self, maxEntities):
+        self.available = collections.deque(range(maxEntities))
+        self.bitsets = list((None,) * maxEntities)
+        self.nActive = 0
 
-    def create_entity(self):
-        self.n_active += 1
-        e_id = self.available.popleft()
-        return Entity(e_id)
+    def createEntity(self):
+        self.nActive += 1
+        eId = self.available.popleft()
+        return Entity(eId)
 
-    def remove_entity(self, entity):
-        self.bitsets[entity.e_id] = 0
-        self.available.append(entity.e_id)
-        self.n_active -= 1
+    def removeEntity(self, entity):
+        self.bitsets[entity.ID] = 0
+        self.available.append(entity.ID)
+        self.nActive -= 1
 
-    def change_bitset(self, entity, bitset):
-        if entity.e_id > len(self.bitsets):
+    def updateBitset(self, entity, bitset):
+        if entity.ID > len(self.bitsets):
             raise ValueError('Entity ID is greater than max_entities')
-        self.bitsets[entity.e_id] = bitset
+        self.bitsets[entity.ID] = bitset

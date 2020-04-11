@@ -1,7 +1,8 @@
 import unittest
 
 from ..Entity import Entity
-from ..System import SystemManager, MovementSystem
+from ..System import SystemManager
+from ..system.MovementSystem import MovementSystem
 
 
 class TestSystemManager(unittest.TestCase):
@@ -12,16 +13,16 @@ class TestSystemManager(unittest.TestCase):
         self.sm.register(MovementSystem, 1)
 
         ms = self.sm.systems[MovementSystem.__name__]
-        ms_bits = self.sm.system_bits[MovementSystem.__name__]
+        ms_bits = self.sm.systemBits[MovementSystem.__name__]
         self.assertEqual(ms_bits, 1)
 
         ent = Entity(1)
 
-        self.sm.update_system_entity(ent, 10)
+        self.sm.updateSystemEntity(ent, 10)
         self.assertEqual(len(ms.entities), 0)
 
-        self.sm.update_system_entity(ent, 33)
+        self.sm.updateSystemEntity(ent, 33)
         self.assertEqual(len(ms.entities), 1)
 
-        self.sm.remove_system_entity(MovementSystem, ent)
+        self.sm.removeSystemEntity(MovementSystem, ent)
         self.assertEqual(len(ms.entities), 0)

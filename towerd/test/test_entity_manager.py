@@ -8,11 +8,11 @@ class TestEntityManager(unittest.TestCase):
         self.em = EntityManager(5)
 
     def test_entity_manager(self):
-        ent = self.em.create_entity()
+        ent = self.em.createEntity()
 
-        self.em.change_bitset(ent, 20)
-        self.assertEqual(self.em.bitsets[ent.e_id], 20)
+        self.em.updateBitset(ent, 20)
+        self.assertEqual(self.em.bitsets[ent.ID], 20)
 
-        e_id = ent.e_id
-        self.em.remove_entity(ent)
+        e_id = ent.ID
+        self.em.removeEntity(ent)
         self.assertEqual(self.em.available[-1], e_id)

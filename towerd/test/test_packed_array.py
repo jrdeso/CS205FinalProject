@@ -1,11 +1,11 @@
 import unittest
 
-from ..util.packed_array import PackedArray, MappedPackedArray
+from ..util.PackedArray import PackedArray, MappedPackedArray
 
 
 class TestPackedArray(unittest.TestCase):
     def setUp(self):
-        self.pa = PackedArray(max_length=5)
+        self.pa = PackedArray(maxLength=5)
 
     def test_access(self):
         n_elems = 3
@@ -23,7 +23,7 @@ class TestPackedArray(unittest.TestCase):
 
 class TestMappedPackedArray(unittest.TestCase):
     def setUp(self):
-        self.pa = MappedPackedArray(max_length=5)
+        self.pa = MappedPackedArray(maxLength=5)
 
     def test_access(self):
         n_elems = 3
@@ -42,6 +42,6 @@ class TestMappedPackedArray(unittest.TestCase):
         self.assertEqual(self.pa['T2'], 2)
         self.assertSequenceEqual(expected, self.pa.arr[:self.pa.size])
 
-        self.pa.remove_key('T2')
+        self.pa.removeKey('T2')
         expected.pop(1)
         self.assertSequenceEqual(expected, self.pa.arr[:self.pa.size])

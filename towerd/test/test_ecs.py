@@ -1,8 +1,9 @@
 import unittest
 
 from ..Entity import EntityManager
-from ..Components import ComponentManager, LocCartesian, Movement, Vital
-from ..System import SystemManager, MovementSystem
+from ..Components import ComponentManager, LocationCartesian, Movement, Vital
+from ..System import SystemManager
+from ..system.MovementSystem import MovementSystem
 from ..Map import Map, PathType
 
 
@@ -21,11 +22,11 @@ class TestECS(unittest.TestCase):
         self.em = EntityManager(5)
 
         self.cm = ComponentManager(5)
-        self.cm.register(LocCartesian)
+        self.cm.register(LocationCartesian)
         self.cm.register(Movement)
         self.cm.register(Vital)
 
-        mob_bits = self.cm.get_component_bits(LocCartesian, Movement, Vital)
+        mob_bits = self.cm.getComponentBits(LocationCartesian, Movement, Vital)
 
         self.sm = SystemManager()
         self.sm.register(MovementSystem, mob_bits)
@@ -33,34 +34,34 @@ class TestECS(unittest.TestCase):
         # Make mobs
         self.orig_coords = [(0.15, 0.2)]
         for i in range(len(self.orig_coords)):
-            ent = self.em.create_entity()
-            self.state['entities'][ent.e_id] = ent
-            self.em.change_bitset(ent, mob_bits)
+            ent = self.em.createEntity()
+            self.state['entities'][ent.ID] = ent
+            self.em.updateBitset(ent, mob_bits)
 
-            loc = LocCartesian(*self.orig_coords[i])
+            loc = LocationCartesian(*self.orig_coords[i])
             vit = Vital(100, 10)
             movement = Movement(0.3, n1.id, n2.id)
 
-            self.cm.add_component(loc, ent)
-            self.cm.add_component(vit, ent)
-            self.cm.add_component(movement, ent)
+            self.cm.addComponent(loc, ent)
+            self.cm.addComponent(vit, ent)
+            self.cm.addComponent(movement, ent)
 
-            self.sm.update_system_entity(ent, mob_bits)
+            self.sm.updateSystemEntity(ent, mob_bits)
 
     def test_ecs(self):
-        ms = self.sm.get_system(MovementSystem)
-        ms.update(1, self.state, self.cm.get_component_arr(Movement),
-                  self.cm.get_component_arr(LocCartesian))
+        ms = self.sm.getSystem(MovementSystem)
+        ms.update(1, self.state, self.cm.getComponentArr(Movement),
+                  self.cm.getComponentArr(LocationCartesian))
 
         # Won't need to do any of the below in Game class
         e0 = self.state['entities'][0]
 
-        loc_comps = self.cm.get_component_arr(LocCartesian)
-        movements = self.cm.get_component_arr(Movement)
+        loc_comps = self.cm.getComponentArr(LocationCartesian)
+        movements = self.cm.getComponentArr(Movement)
 
-        loc_comp0 = loc_comps[e0.e_id]
-        movement0 = movements[e0.e_id]
+        loc_comp0 = loc_comps[e0.ID]
+        movement0 = movements[e0.ID]
 
         orig_coords0 = self.orig_coords[0]
-        self.assertEqual(loc_comp0.x, orig_coords0[0] + movement0.movement_speed)
+        self.assertEqual(loc_comp0.x, orig_coords0[0] + movement0.speed)
         self.assertEqual(loc_comp0.y, orig_coords0[1])

@@ -1,7 +1,7 @@
 import dataclasses
 
 from towerd.Entity import Entity
-from towerd.util.packed_array import MappedPackedArray
+from towerd.util.PackedArray import MappedPackedArray
 
 
 class ComponentManager:
@@ -14,10 +14,10 @@ class ComponentManager:
     :var component_arrs: an list of packed arrays of components
     :var max_entities: store of the max_entities parameter
     """
-    def __init__(self, max_entities):
+    def __init__(self, maxEntities):
         self.components = {}
-        self.component_arrs = []
-        self.max_entities = max_entities
+        self.componentArrs = []
+        self.maxEntities = maxEntities
 
     def register(self, T):
         """
@@ -27,31 +27,31 @@ class ComponentManager:
 
         :param T: the component class
         """
-        self.components[T.__name__] = len(self.component_arrs)
-        self.component_arrs.append(MappedPackedArray(self.max_entities))
+        self.components[T.__name__] = len(self.componentArrs)
+        self.componentArrs.append(MappedPackedArray(self.maxEntities))
 
-    def get_component_bits(self, *Ts):
+    def getComponentBits(self, *Ts):
         """
         Get a bitset uniquely identifying the component class that are
         specified.
 
         :param Ts: any number of Component arguments
         """
-        component_bits = 0
+        componentBits = 0
         for T in Ts:
             bitshift = self.components[T.__name__]
-            component_bits |= 1 << bitshift
-        return component_bits
+            componentBits |= 1 << bitshift
+        return componentBits
 
-    def get_component_arr(self, T):
+    def getComponentArr(self, T):
         """
         Get a packed array of components associated with an entity.
 
         :param T: the Component class
         """
-        return self.component_arrs[self.components[T.__name__]]
+        return self.componentArrs[self.components[T.__name__]]
 
-    def add_component(self, component, entity):
+    def addComponent(self, component, entity):
         """
         Associate an instance of a component with an entity.
 
@@ -59,9 +59,9 @@ class ComponentManager:
         :param entity: the entity
         """
         idx = self.components[component.__class__.__name__]
-        self.component_arrs[idx].append(component, key=entity.e_id)
+        self.componentArrs[idx].append(component, key=entity.ID)
 
-    def remove_component(self, T, entity):
+    def removeComponent(self, T, entity):
         """
         Remove components of type T with an entity.
 
@@ -69,28 +69,28 @@ class ComponentManager:
         :param entity: the entity
         """
         idx = self.components[T.__name__]
-        self.component_arrs[idx].remove_key(entity.e_id)
+        self.componentArrs[idx].removeKey(entity.ID)
 
-    def remove_all(self, entity):
+    def removeAll(self, entity):
         """
         Remove all components associated with an entity
 
         :param entity: the entity
         """
-        for arr in self.component_arrs:
+        for arr in self.componentArrs:
             try:
-                arr.remove_key(entity.e_id)
+                arr.removeKey(entity.ID)
             except KeyError:
                 continue
 
 
 @dataclasses.dataclass
-class LocNode:
+class LocationNode:
     node: int
 
 
 @dataclasses.dataclass
-class LocCartesian:
+class LocationCartesian:
     x: int
     y: int
 
@@ -98,7 +98,7 @@ class LocCartesian:
 @dataclasses.dataclass
 class Level:
     level: int
-    upgrade_cost: int
+    upgradeCost: int
 
 
 @dataclasses.dataclass
@@ -109,15 +109,15 @@ class Vital:
 
 @dataclasses.dataclass
 class Movement:
-    movement_speed: float
-    from_node: int
-    dest_node: int
+    speed: float
+    fromNode: int
+    destNode: int
 
 
 @dataclasses.dataclass
 class Attack:
-    attack_range: float
-    attack_speed: float
+    attackRange: float
+    attackSpeed: float
     dmg: float
     target: Entity
 

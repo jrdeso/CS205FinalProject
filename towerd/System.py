@@ -24,46 +24,6 @@ class System(abc.ABC):
         raise NotImplementedError
 
 
-class MovementSystem(System):
-    def update(self, dt, state, movement_comps, loc_comps):
-        for entity in self.entities:
-            movement_comp = movement_comps[entity.e_id]
-            speed = movement_comp.movement_speed
-            from_node = movement_comp.from_node
-            dest_node = movement_comp.dest_node
-
-            m = state['map']
-            from_node = m.nodes[from_node]
-            dest_node = m.nodes[dest_node]
-            loc_comp = loc_comps[entity.e_id]
-
-            from_x, from_y = loc_comp.x, loc_comp.y
-            dest_x, dest_y = dest_node.x, dest_node.y
-
-            total_diff_x = dest_x - from_x
-            total_diff_y = dest_y - from_y
-
-            theta = math.atan2(total_diff_y, total_diff_x)
-            dl = speed * dt
-
-            dx = dl * math.cos(theta)
-            dy = dl * math.sin(theta)
-
-            if from_x < dest_x and (new_x := from_x + dx) < dest_x:
-                loc_comp.x = new_x
-            elif from_x > dest_x and (new_x := from_x - dx) > dest_x:
-                loc_comp.x = new_x
-            else:
-                loc_comp.x = dest_x
-
-            if from_y < dest_y and (new_y := from_y + dy) < dest_y:
-                loc_comp.y = new_y
-            elif from_y > dest_y and (new_y := from_y - dy) > dest_y:
-                loc_comp.y = new_y
-            else:
-                loc_comp.y = dest_y
-
-
 class SystemManager:
     """
     Manages all instances of registered systems
@@ -76,7 +36,7 @@ class SystemManager:
     """
     def __init__(self):
         self.systems = {}
-        self.system_bits = {}
+        self.systemBits = {}
 
     def register(self, T, bitset):
         """
@@ -87,9 +47,9 @@ class SystemManager:
         :param bitset: a bitset representing required components
         """
         self.systems[T.__name__] = T()
-        self.system_bits[T.__name__] = bitset
+        self.systemBits[T.__name__] = bitset
 
-    def get_system(self, T):
+    def getSystem(self, T):
         """
         Get the instance of the System.
 
@@ -97,7 +57,7 @@ class SystemManager:
         """
         return self.systems[T.__name__]
 
-    def remove_system_entity(self, T, entity):
+    def removeSystemEntity(self, T, entity):
         """
         Remove an entity from a registered System.
 
@@ -106,7 +66,7 @@ class SystemManager:
         """
         self.systems[T.__name__].entities.discard(entity)
 
-    def remove_all_entity(self, entity):
+    def removeAllEntity(self, entity):
         """
         Remove an entity from all systems.
 
@@ -116,18 +76,18 @@ class SystemManager:
         for system in self.systems.values():
             system.entities.discard(entity)
 
-    def update_system_entity(self, entity, entity_bitset):
+    def updateSystemEntity(self, entity, entityBitset):
         """
         Update an entity bitset. Remove enitity from systems where the entity
         bitset in part does not match the system bitset. Add them to systems
         where the entity_bitset does in part match the system bitset.
 
         :param entity: the entity
-        :param entity_bitset: the new bitset for the entity
+        :param entityBitset: the new bitset for the entity
         """
         for system in self.systems.values():
-            system_bits = self.system_bits[system.__class__.__name__]
-            if system_bits & entity_bitset == system_bits:
+            systemBits = self.systemBits[system.__class__.__name__]
+            if systemBits & entityBitset == systemBits:
                 system.entities.add(entity)
             else:
                 system.entities.discard(entity)

@@ -1,8 +1,8 @@
 class PackedArray:
-    def __init__(self, max_length=None):
-        arr = list((None,) * max_length) if max_length else []
+    def __init__(self, maxLength=None):
+        arr = list((None,) * maxLength) if maxLength else []
         self.arr = arr
-        self.max_length = max_length
+        self.maxLength = maxLength
         self.size = 0
 
     def __len__(self):
@@ -28,7 +28,7 @@ class PackedArray:
         return iter(self.arr[:self.size])
 
     def append(self, object):
-        if self.size >= self.max_length:
+        if self.size >= self.maxLength:
             raise IndexError('Array is full.')
         self.arr[self.size] = object
         self.size += 1
@@ -44,7 +44,7 @@ class MappedPackedArray(PackedArray):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.map2idx = {}
-        self.idx2map = {k: None for k in range(self.max_length)}
+        self.idx2map = {k: None for k in range(self.maxLength)}
 
     def __getitem__(self, key):
         idx = self.map2idx[key]
@@ -66,7 +66,7 @@ class MappedPackedArray(PackedArray):
 
     def remove(self, idx):
         super().remove(idx)
-        removed_key = self.idx2map[idx]
+        removedKey = self.idx2map[idx]
 
         # don't decrement self.size since self.size was decremented in parent
         self.idx2map[idx] = self.idx2map[self.size]
@@ -74,8 +74,8 @@ class MappedPackedArray(PackedArray):
         self.map2idx[key] = idx
 
         self.idx2map[self.size] = None
-        del self.map2idx[removed_key]
+        del self.map2idx[removedKey]
 
-    def remove_key(self, key):
+    def removeKey(self, key):
         idx = self.map2idx[key]
         self.remove(idx)
