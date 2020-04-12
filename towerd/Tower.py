@@ -11,18 +11,18 @@ class Tower:
     def __init__(self, subclass, x, y):
         self.xCoord = x
         self.yCoord = y
-        if(subclass == Soldier):
-            self.subclass = Soldier
+        if(subclass == TowerSubclass.Soldier):
+            self.subclass = TowerSubclass.Soldier
             self.damage = 10
             self.range = 2
             self.level = 0
-        if(subclass == Archer):
-            self.subclass = Archer
+        if(subclass == TowerSubclass.Archer):
+            self.subclass = TowerSubclass.Archer
             self.damage = 7
             self.range = 5
             self.level = 0
-        if(subclass == Mage):
-            self.subclass = Mage
+        if(subclass == TowerSubclass.Mage):
+            self.subclass = TowerSubclass.Mage
             self.damage = 10
             self.range = 4
             self.level = 0
@@ -48,14 +48,14 @@ class Tower:
 
     # Get cost for upgrading, these numbers can be changed later depending on how much money the player gets per enemy/wave
     def getUpgradeCost(self):
-        if(self.subclass == Soldier):
+        if(self.subclass == TowerSubclass.Soldier):
             if(self.level == 0):
                 return 100
             elif(self.level == 1):
                 return 150
             else:
                 return 200
-        elif(self.subclass == Archer):
+        elif(self.subclass == TowerSubclass.Archer):
             if (self.level == 0):
                 return 150
             elif (self.level == 1):
