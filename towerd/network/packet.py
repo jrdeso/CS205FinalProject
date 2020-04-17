@@ -1,6 +1,5 @@
 import abc
 import dataclasses
-import enum
 import struct
 
 
@@ -33,6 +32,7 @@ class Packet(abc.ABC):
         the unique id for this packet
     """
     __COUNT = 0
+    STATIC_SIZE = 2
 
     def __init__(self):
         self.seq = Packet.__COUNT
@@ -42,7 +42,7 @@ class Packet(abc.ABC):
         raise NotImplementedError
 
     def serialize(self):
-        raise NotImplementedError
+        return struct.pack('<HH', self.size(), self.seq)
 
 
 @dataclasses.dataclass
@@ -54,19 +54,16 @@ class AckPacket(Packet):
     ----------
     ack
         the id that the client has received
-    n_slices
-        the number of slices
     ack_bits
-        the marked slices received
+        the marked packets received
 
     Notes
     -----
     Due to implementation of ack_bits, max amount of data is 32kib.
     """
-    STATIC_SIZE = 10
+    STATIC_SIZE = super().STATIC_SIZE + 4
 
     ack: int = 0
-    n_slices: int = 0
     ack_bits: int = 0
 
     def __post_init__(self):
@@ -76,7 +73,41 @@ class AckPacket(Packet):
         return AckPacket.STATIC_SIZE
 
     def serialize(self):
-        return struct.pack('<HHHI', self.size(), self.seq, self.ack, self.ack_bits)
+        return super().serialize() + struct.pack('<HI', self.ack, self.ack_bits)
+
+
+@dataclasses.dataclass
+class AckDataPacket(AckPacket):
+    """
+    Data for reliable data transfer of sending sliced data.
+
+    Attributes
+    ----------
+    ack
+        the id that the client has received
+    n_slices
+        the number of slices received
+    ack_bits
+        the marked slices received
+
+    Notes
+    -----
+    Due to implementation of ack_bits, max amount of data is 32kib.
+    """
+    STATIC_SIZE = super().STATIC_SIZE + 6
+
+    ack_chunk: int = 0
+    ack_slice: int = 0
+    n_slices: int = 0
+
+    def __post_init__(self):
+        super().__init__()
+
+    def size(self):
+        return AckPacket.STATIC_SIZE
+
+    def serialize(self):
+        return struct.pack('<HHH', self.ack_chunk, self.ack_slice, self.n_slices)
 
 
 @dataclasses.dataclass
@@ -86,17 +117,21 @@ class DataPacket(Packet):
 
     Attributes
     ----------
+    chunk_id
+        the chunk id
     slice_id
         the slice id that is being sent
-    slide_bytes
-        the size of this packet and data
+    n_slices
+        the total number of slices
     data
         serialized data to be sent over the network
     """
-    STATIC_SIZE = 4
+    STATIC_SIZE = 6
 
-    slice_id: int
-    data: str
+    chunk_id: int = 0
+    slice_id: int = 0
+    n_slices: int = 0
+    data: str = ''
 
     def __post_init__(self):
         super().__init__()
@@ -105,24 +140,4 @@ class DataPacket(Packet):
         return DataPacket.STATIC_SIZE + len(self.data)
 
     def serialize(self):
-        return struct.pack('<HH', self.size(), self.seq) + self.data.encode('ascii')
-
-
-class PacketType(enum.Enum):
-    DATA = 0
-    ACK = 1
-
-
-class PacketFactory:
-    def __init__(self, max_packet_size):
-        self.max_packet_size = max_packet_size
-
-    def create_packet(self, packet_type, *args, **kwargs):
-        if packet_type == PacketType.DATA:
-            dp = DataPacket(*args, **kwargs)
-            if DataPacket.STATIC_SIZE + len(dp.data) >= self.max_packet_size:
-                max_data_size = self.max_packet_size - DataPacket.STATIC_SIZE
-                raise ValueError(f'Payload too large: len(load) > {max_data_size}')
-            return dp
-        elif packet_type == PacketType.ACK:
-            return AckPacket(*args, **kwargs)
+        return super().serialize() + struct.pack('<HHH', self.chunk_id, self.slice_id, self.n_slices) + self.data.encode('ascii')
