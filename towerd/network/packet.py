@@ -77,6 +77,30 @@ class AckPacket(Packet):
 
 
 @dataclasses.dataclass
+class DataPacket(Packet):
+    """
+    Data for reliable data transfer of sending data.
+
+    Attributes
+    ----------
+    data
+        data to be sent
+    """
+    STATIC_SIZE = Packet.STATIC_SIZE
+
+    data: str = ''
+
+    def __post_init__(self):
+        super().__init__()
+
+    def size(self):
+        return DataPacket.STATIC_SIZE
+
+    def serialize(self):
+        return super().serialize() + struct.pack(f'<{len(self.data)}s', self.data)
+
+
+@dataclasses.dataclass
 class AckChunkPacket(AckPacket):
     """
     Data for reliable data transfer of sending sliced data.
