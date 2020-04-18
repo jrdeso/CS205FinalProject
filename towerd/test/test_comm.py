@@ -61,7 +61,7 @@ class TestComm(unittest.TestCase):
             while not self.crm.ready:
                 dp = next(self.csm)
                 if dp is not None:
-                    self.csm.mark_sent(dp.slice_id)
+                    self.csm.update_last_sent(dp.slice_id)
                     ap = self.crm.receive(dp)
                     if ap is not None:
                         self.csm.receive(ap)
