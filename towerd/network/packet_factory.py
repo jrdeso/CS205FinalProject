@@ -1,12 +1,4 @@
-import enum
-
-from towerd.network.packet import ChunkPacket, AckPacket, AckChunkPacket
-
-
-class PacketType(enum.Enum):
-    ACK = enum.auto()
-    ACK_CHUNK = enum.auto()
-    CHUNK = enum.auto()
+from towerd.network.packet import PacketType, ChunkPacket, AckPacket, AckChunkPacket
 
 
 class PacketFactory:
