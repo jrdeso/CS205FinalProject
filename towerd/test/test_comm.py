@@ -69,3 +69,4 @@ class TestComm(unittest.TestCase):
                     raise Exception("Timeout: took longer than 100 ms")
             data += self.crm.retrieve_data()
         self.assertEqual(self.csm.data, data)
+        self.assertTrue(self.csm.done)

@@ -83,7 +83,6 @@ class ChunkSendManager:
         self.chunk_data = self.data[chunk_start:chunk_end]
         if self.chunk_data == "":
             self.chunk_data = "\0"
-            self.done = True
         self.n_slices = max(1, len(self.chunk_data) // self.max_slice_size)
 
     def get_slice(self, slice_id):
@@ -114,9 +113,12 @@ class ChunkSendManager:
             self.n_acked += 1
         self.acked |= ack_packet.ack_bits
 
-        if ack_packet.n_slices == self.n_slices and self.chunk_id != self.max_chunks:
-            self.chunk_id += 1
-            self.prep_chunk()
+        if ack_packet.n_slices == self.n_slices:
+            if self.chunk_id != self.max_chunks:
+                self.chunk_id += 1
+                self.prep_chunk()
+            else:
+                self.done = True
 
 
 class ChunkReceiveManager:
