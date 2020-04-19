@@ -25,6 +25,7 @@ class ChunkSendManager:
     """
     def __init__(self, data, max_slice_size, max_slice_per_chunk, min_delay=100):
         self.data = data
+        self.done = False
         self.max_slice_size = max_slice_size
         self.max_slice_per_chunk = max_slice_per_chunk
         self.min_delay = min_delay
@@ -82,6 +83,7 @@ class ChunkSendManager:
         self.chunk_data = self.data[chunk_start:chunk_end]
         if self.chunk_data == "":
             self.chunk_data = "\0"
+            self.done = True
         self.n_slices = max(1, len(self.chunk_data) // self.max_slice_size)
 
     def get_slice(self, slice_id):
