@@ -79,3 +79,29 @@ class MappedPackedArray(PackedArray):
     def removeKey(self, key):
         idx = self.map2idx[key]
         self.remove(idx)
+
+
+class MappedPackedOverflowArray(MappedPackedArray):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.idx = 0
+
+    def append(self, object, key=None):
+        if self.size >= self.maxLength:
+            old_key = self.idx2map[self.idx]
+            del self.map2idx[old_key]
+
+            if key is None:
+                key = object
+
+            self.map2idx[key] = self.idx
+            self.idx2map[self.idx] = key
+            super(MappedPackedArray, self).__setitem__(self.idx, object)
+        else:
+            super().append(object, key)
+        self.idx = (self.idx + 1) % self.maxLength
+
+    def remove(self, idx):
+        super().remove(idx)
+        if self.idx > self.size:
+            self.idx = self.size
