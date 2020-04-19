@@ -17,7 +17,7 @@ class TestPacket(unittest.TestCase):
         dp = self.pf.create_packet(PacketType.CHUNK, chunk_id=0, slice_id=slice_id, n_slices=1, data=data)
 
         self.assertEqual(dp.size(), packet_length)
-        self.assertEqual(len(dp.serialize()), packet_length)
+        self.assertEqual(len(dp.serialize(1234)), packet_length)
 
     def test_ack_packet(self):
         ack = 65535
@@ -41,4 +41,4 @@ class TestPacket(unittest.TestCase):
         ap = self.pf.create_packet(PacketType.ACK_CHUNK, ack=ack, ack_chunk=ack_chunk, ack_slice=ack_slice, n_slices=n_slices, ack_bits=ack_bits)
 
         self.assertEqual(AckChunkPacket.STATIC_SIZE, ap.size())
-        self.assertEqual(ap.size(), len(ap.serialize()))
+        self.assertEqual(ap.size(), len(ap.serialize(1234)))
