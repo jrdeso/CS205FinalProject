@@ -11,6 +11,7 @@ class Mob:
         self.animation_count = 0  # This variable is used to animate the mobs (We could do them without animating them). It starts at 0 which is the default position for going straight
         self.health = 100  # Base health for basic mobs is 100. We have to adjust this number
         self.alive = True
+        self.damage = 10
         # self.sprite =  None
 
         ''' Old code, I don't want to delete it but I think this will be moved to Game class eventually
@@ -24,15 +25,35 @@ class Mob:
                    self.animation_count = 0 #This resets the animations back
         '''
 
+        # Getters
+        def getX(self):
+            return self.x
+
+        def getY(self):
+            return self.y
+
+        def getAlive(self):
+            return self.alive
+
+        def getDamage(self):
+            return self.damage
+
         # Not sure how Game will tell Mob to move, but it should be something like this
         def move(self, newX, newY):
             self.x = newX
             self.y = newY
 
+        # Method to take damage, returns True if the mob died
         def takeDamage(self, damage):
             self.health -= damage
             if (self.health <= 0):
                 # Mob is dead, return true to Game
                 self.alive = False
+                return True
+            return False
+
+        # Checks if the mob is at the player's base
+        def atBase(self, baseX, baseY):
+            if(self.x == baseX and self.y == baseY):
                 return True
             return False
