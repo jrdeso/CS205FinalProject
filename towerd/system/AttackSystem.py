@@ -1,4 +1,5 @@
-import math, kdtree
+import math
+import kdtree
 
 from ..System import System
 
@@ -6,38 +7,41 @@ from ..System import System
 class AttackSystem(System):
     def update(self, dt, state, attackComps, vitalComps, locComps):
         for entity in self.entities:
+            tree = self.state['tree']
             entityLocComp = locComps[entity.ID]
             entityAttackComp = attackComps[entity.ID]
 
-            # Find entity nearest to this entity
-            tree = self.state['tree']
-            nearestEntity = tree.search_nn(entityLocComp.x, entityLocComp.y)
-            nearestEntityAttackComp = attackComps[nearestEntity.ID]
-            nearestEntityLocComp = locComps[nearestEntity.ID]
-            nearestEntityVitalComp = vitalComps[nearestEntity.ID]
+            # If the attacker doesn't already have a target, set the target to be the nearest entity
+            if(entityAttackComp.target == None):
+                # Find entity nearest to this entity
+                nearestEntity = tree.search_nn(entityLocComp.x, entityLocComp.y)
+                entityAttackComp.target = nearestEntity
 
-            # if nearestEntity is attackable
-            if(nearestEntityAttackComp.attackable == True):
-                # calculate distance between entity and nearestEntity
-                distance = math.sqrt(math.pow(nearestEntityLocComp.x - entityLocComp.x, 2) + math.pow(nearestEntityLocComp.y - entityLocComp.y, 2))
+            targetAttackComp = attackComps[entityAttackComp.target.ID]
+            targetLocComp = locComps[entityAttackComp.target.ID]
+            targetVitalComp = vitalComps[entityAttackComp.target.ID]
 
-                # if nearestEntity is within range
+            # if target is attackable
+            if(targetAttackComp.attackable == True):
+                # calculate distance between entity and target
+                distance = math.sqrt(math.pow(targetLocComp.x - entityLocComp.x, 2) + math.pow(targetLocComp.y - entityLocComp.y, 2))
+
+                # Calculate total damage based on entity's damage and the amount of time passed vs. attack speed
+                totalDamage = entityAttackComp.attackSpeed * dt * entityAttackComp.dmg
+
+                # if target is within range
                 if(distance <= entityLocComp.attackRange):
                     # Do the damage to nearest entity
 
                     # if it has a shield, subtract from shield
-                    if(nearestEntityVitalComp.shield > 0):
-                        nearestEntityVitalComp.shield -= entityAttackComp.dmg
+                    if(targetVitalComp.shield > 0):
+                        targetVitalComp.shield -= totalDamage
 
                         # If the shield is below 0, deal excess damage to health
-                        if(nearestEntityVitalComp.shield <= 0):
-                            excessDamage = 0 - nearestEntityVitalComp.shield
-                            nearestEntityVitalComp.health -= excessDamage
+                        if(targetVitalComp.shield <= 0):
+                            excessDamage = 0 - targetVitalComp.shield
+                            targetVitalComp.health -= excessDamage
 
                     else:
-                        # nearestEntity has no shield, deal damage directly to health
-                        nearestEntityVitalComp.health -= entityAttackComp.dmg
-
-                    # If nearestEntity is dead kill it
-                    if(nearestEntityVitalComp.health <= 0):
-                        # it is dead
+                        # target has no shield, deal damage directly to health
+                        targetVitalComp.health -= totalDamage
