@@ -4,34 +4,40 @@ from ..System import System
 
 
 class AttackSystem(System):
-    def update(self, dt, state):
+    def update(self, dt, state, attackComps, vitalComps, locComps):
         for entity in self.entities:
+            entityLocComp = locComps[entity.ID]
+            entityAttackComp = attackComps[entity.ID]
+
             # Find entity nearest to this entity
-            tree = kdtree.create([entity.x, entity.y])
-            nearestEntity = tree.search_nn(entity.x, entity.y)
+            tree = self.state['tree']
+            nearestEntity = tree.search_nn(entityLocComp.x, entityLocComp.y)
+            nearestEntityAttackComp = attackComps[nearestEntity.ID]
+            nearestEntityLocComp = locComps[nearestEntity.ID]
+            nearestEntityVitalComp = vitalComps[nearestEntity.ID]
 
             # if nearestEntity is attackable
-            if(nearestEntity.attackable == True):
+            if(nearestEntityAttackComp.attackable == True):
                 # calculate distance between entity and nearestEntity
-                distance = math.sqrt(math.pow(nearestEntity.x - entity.x, 2) + math.pow(nearestEntity.y - entity.y, 2))
+                distance = math.sqrt(math.pow(nearestEntityLocComp.x - entityLocComp.x, 2) + math.pow(nearestEntityLocComp.y - entityLocComp.y, 2))
 
                 # if nearestEntity is within range
-                if(distance <= entity.attackRange):
+                if(distance <= entityLocComp.attackRange):
                     # Do the damage to nearest entity
 
                     # if it has a shield, subtract from shield
-                    if(nearestEntity.shield > 0):
-                        nearestEntity.shield -= entity.dmg
+                    if(nearestEntityVitalComp.shield > 0):
+                        nearestEntityVitalComp.shield -= entityAttackComp.dmg
 
                         # If the shield is below 0, deal excess damage to health
-                        if(nearestEntity.shield <= 0):
-                            excessDamage = 0 - nearestEntity.shield
-                            nearestEntity.health -= excessDamage
-                            
+                        if(nearestEntityVitalComp.shield <= 0):
+                            excessDamage = 0 - nearestEntityVitalComp.shield
+                            nearestEntityVitalComp.health -= excessDamage
+
                     else:
                         # nearestEntity has no shield, deal damage directly to health
-                        nearestEntity.health -= entity.dmg
+                        nearestEntityVitalComp.health -= entityAttackComp.dmg
 
                     # If nearestEntity is dead kill it
-                    if(nearestEntity.health <= 0):
+                    if(nearestEntityVitalComp.health <= 0):
                         # it is dead
