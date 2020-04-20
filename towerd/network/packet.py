@@ -140,6 +140,20 @@ class AckChunkPacket(AckPacket):
     ack_slice: int = 0
     n_slices: int = 0
 
+    @staticmethod
+    def gen_from_bytes(b):
+        acp = AckChunkPacket()
+        fmt = AckPacket.SERIALIZE_FORMAT + AckChunkPacket.SERIALIZE_FORMAT[1:]
+        ack, ack_bits, ack_chunk, ack_slice, n_slices = struct.unpack(fmt, b)
+
+        acp.ack = ack
+        acp.ack_bits = ack_bits
+        acp.ack_chunk = ack_chunk
+        acp.ack_slice = ack_slice
+        acp.n_slices = n_slices
+
+        return acp
+
     def __post_init__(self):
         super(AckPacket, self).__init__(PacketType.ACK_CHUNK)
 
@@ -174,6 +188,21 @@ class ChunkPacket(Packet):
     slice_id: int = 0
     n_slices: int = 0
     data: str = ''
+
+    @staticmethod
+    def gen_from_bytes(b):
+        cp = ChunkPacket()
+        static_fmt = ChunkPacket.SERIALIZE_FORMAT[:4]
+        data_len = len(b) - struct.calcsize(static_fmt)
+        fmt = ChunkPacket.SERIALIZE_FORMAT.format(data_len)
+        chunk_id, slice_id, n_slices, data = struct.unpack(fmt, b)
+
+        cp.chunk_id = chunk_id
+        cp.slice_id = slice_id
+        cp.n_slices = n_slices
+        cp.data = data.decode('ascii')
+
+        return cp
 
     def __post_init__(self):
         super().__init__(PacketType.CHUNK)
