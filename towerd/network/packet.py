@@ -71,9 +71,10 @@ class AckPacket(Packet):
     -----
     Due to implementation of ack_bits, max amount of data is 32kib.
     """
-    STATIC_SIZE = Packet.STATIC_SIZE + 6
-    SERIALIZE_FORMAT = '<HI'
+    STATIC_SIZE = Packet.STATIC_SIZE + 7
+    SERIALIZE_FORMAT = '<BHI'
 
+    error: int = 0
     ack: int = 0
     ack_bits: int = 0
 
@@ -85,7 +86,7 @@ class AckPacket(Packet):
 
     def serialize(self, auth_code):
         parent_serial = super().serialize(auth_code)
-        return parent_serial + struct.pack(AckPacket.SERIALIZE_FORMAT, self.ack, self.ack_bits)
+        return parent_serial + struct.pack(AckPacket.SERIALIZE_FORMAT, self.error, self.ack, self.ack_bits)
 
 
 @dataclasses.dataclass
