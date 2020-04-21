@@ -14,19 +14,19 @@ class TestComponentManager(unittest.TestCase):
         self.cm.register(LocationCartesian)
         self.cm.register(Vital)
 
-        self.assertEqual(self.cm.getComponentBits(LocationCartesian), 1)
-        self.assertEqual(self.cm.getComponentBits(Vital), 2)
+        self.assertEqual(self.cm.getBitset(LocationCartesian), 1)
+        self.assertEqual(self.cm.getBitset(Vital), 2)
 
         ent = Entity(1)
         pos = LocationCartesian(1, 1)
         vit = Vital(100, 10)
 
-        self.cm.addComponent(pos, ent)
-        self.cm.addComponent(vit, ent)
+        self.cm.add(pos, ent)
+        self.cm.add(vit, ent)
 
-        loc_mpa = self.cm.getComponentArr(LocationCartesian)
+        loc_mpa = self.cm.getArr(LocationCartesian)
         self.assertEqual(pos, loc_mpa[ent.ID])
 
-        self.cm.removeAll(ent)
-        self.assertEqual(len(self.cm.getComponentArr(LocationCartesian)), 0)
-        self.assertEqual(len(self.cm.getComponentArr(Vital)), 0)
+        self.cm.removeEntityAll(ent)
+        self.assertEqual(len(self.cm.getArr(LocationCartesian)), 0)
+        self.assertEqual(len(self.cm.getArr(Vital)), 0)

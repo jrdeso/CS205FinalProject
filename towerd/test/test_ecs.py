@@ -2,16 +2,14 @@ import unittest
 
 import kdtree
 
-from ..Entity import EntityManager
+from ..ECS import ECSManager
 from ..util.EntityPoint2D import EntityPoint2D
-from ..Component import ComponentManager
 from ..component.LocationCartesian import LocationCartesian
 from ..component.LocationNode import LocationNode
 from ..component.Movement import Movement
 from ..component.Vital import Vital
 from ..component.Attack import Attack
 from ..component.Faction import Faction
-from ..System import SystemManager
 from ..system.MovementSystem import MovementSystem
 from ..system.AttackSystem import AttackSystem
 from ..Map import Map, PathType
@@ -30,63 +28,39 @@ class TestECS(unittest.TestCase):
         self.state['entities'] = {}
 
         # Initial ECS setup
-        self.em = EntityManager(5)
+        self.ecsm = ECSManager(5)
+        self.ecsm.registerComponent(LocationCartesian)
+        self.ecsm.registerComponent(LocationNode)
+        self.ecsm.registerComponent(Movement)
+        self.ecsm.registerComponent(Vital)
+        self.ecsm.registerComponent(Attack)
+        self.ecsm.registerComponent(Faction)
 
-        self.cm = ComponentManager(5)
-        self.cm.register(LocationCartesian)
-        self.cm.register(LocationNode)
-        self.cm.register(Movement)
-        self.cm.register(Vital)
-        self.cm.register(Attack)
-        self.cm.register(Faction)
-
-        mob_bits = self.cm.getComponentBits(LocationCartesian, Movement, Vital, Attack, Faction)
-        attack_system_bits = self.cm.getComponentBits(Attack, Faction, LocationCartesian)
-
-        self.sm = SystemManager()
-        self.sm.register(MovementSystem, mob_bits)
-        self.sm.register(AttackSystem, attack_system_bits)
+        self.ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
+        self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
 
         # Make mobs
         self.orig_coords = [(0.15, 0.2), (0.2, 0.2)]
         for i in range(len(self.orig_coords)):
-            ent = self.em.createEntity()
+            ent = self.ecsm.createEntity()
+            self.ecsm.addEntityComponent(ent, LocationCartesian(*self.orig_coords[i]))
+            self.ecsm.addEntityComponent(ent, Vital(100, 10))
+            self.ecsm.addEntityComponent(ent, Movement(0.3, n1.id, n2.id))
+            self.ecsm.addEntityComponent(ent, Attack(attackRange=0.01, attackSpeed=2, dmg=5, target=None, attackable=True))
+            self.ecsm.addEntityComponent(ent, Faction(faction=0))
+
             self.state['entities'][ent.ID] = ent
-            self.em.updateBitset(ent, mob_bits)
-
-            loc = LocationCartesian(*self.orig_coords[i])
-            vit = Vital(100, 10)
-            movement = Movement(0.3, n1.id, n2.id)
-            attack = Attack(attackRange=0.01, attackSpeed=2, dmg=5, target=None, attackable=True)
-            faction = Faction(faction=0)
-
-            self.cm.addComponent(loc, ent)
-            self.cm.addComponent(vit, ent)
-            self.cm.addComponent(movement, ent)
-            self.cm.addComponent(attack, ent)
-            self.cm.addComponent(faction, ent)
-
-            self.sm.updateSystemEntity(ent, mob_bits)
             setattr(self, f'e{i}', ent)
 
         # Make tower
-        tower_bits = self.cm.getComponentBits(LocationNode, LocationCartesian, Attack, Faction)
-        tower_ent = self.em.createEntity()
-        self.state['entities'][tower_ent.ID] = tower_ent
-        self.em.updateBitset(tower_ent, tower_bits)
-
         tower_node = n3
-        loc_node = LocationNode(tower_node.id)
-        loc_cart = LocationCartesian(tower_node.x, tower_node.y)
-        attack = Attack(attackRange=0.5, attackSpeed=2, dmg=5, target=None, attackable=False)
-        faction = Faction(faction=1)
+        tower_ent = self.ecsm.createEntity()
+        self.ecsm.addEntityComponent(tower_ent, LocationNode(tower_node.id))
+        self.ecsm.addEntityComponent(tower_ent, LocationCartesian(tower_node.x, tower_node.y))
+        self.ecsm.addEntityComponent(tower_ent, Attack(attackRange=0.5, attackSpeed=2, dmg=5, target=None, attackable=False))
+        self.ecsm.addEntityComponent(tower_ent, Faction(faction=1))
 
-        self.cm.addComponent(loc_node, tower_ent)
-        self.cm.addComponent(loc_cart, tower_ent)
-        self.cm.addComponent(attack, tower_ent)
-        self.cm.addComponent(faction, tower_ent)
-
-        self.sm.updateSystemEntity(tower_ent, tower_bits)
+        self.state['entities'][tower_ent.ID] = tower_ent
 
         # build tree
         k2tree = kdtree.create(dimensions=2)
@@ -95,35 +69,31 @@ class TestECS(unittest.TestCase):
         self.state['tree'] = k2tree
 
     def test_movement(self):
-        ms = self.sm.getSystem(MovementSystem)
-        ms.update(1, self.state, self.cm)
+        ms = self.ecsm.getSystem(MovementSystem)
+        ms.update(1, self.state, self.ecsm)
 
         # Won't need to do any of the below in Game class
-        loc_comps = self.cm.getComponentArr(LocationCartesian)
-        movements = self.cm.getComponentArr(Movement)
-
-        loc_comp0 = loc_comps[self.e0.ID]
-        movement0 = movements[self.e0.ID]
+        loc_comp0 = self.ecsm.getEntityComponent(self.e0, LocationCartesian)
+        movement0 = self.ecsm.getEntityComponent(self.e0, Movement)
 
         orig_coords0 = self.orig_coords[0]
         self.assertEqual(loc_comp0.x, orig_coords0[0] + movement0.speed)
         self.assertEqual(loc_comp0.y, orig_coords0[1])
 
     def test_attack(self):
-        atks = self.sm.getSystem(AttackSystem)
-        atks.update(1, self.state, self.cm)
-        atks.update(1, self.state, self.cm)
+        atks = self.ecsm.getSystem(AttackSystem)
+        atks.update(1, self.state, self.ecsm)
+        atks.update(1, self.state, self.ecsm)
 
-        vital_comps = self.cm.getComponentArr(Vital)
-        vital_comp0 = vital_comps[self.e0.ID]
-        vital_comp1 = vital_comps[self.e1.ID]
+        vital_comp0 = self.ecsm.getEntityComponent(self.e0, Vital)
+        vital_comp1 = self.ecsm.getEntityComponent(self.e1, Vital)
 
         self.assertEqual(vital_comp0.health, 100)
         self.assertEqual(vital_comp0.shield, 0)
         self.assertEqual(vital_comp1.health, 100)
         self.assertEqual(vital_comp1.shield, 10)
 
-        atks.update(1, self.state, self.cm)
+        atks.update(1, self.state, self.ecsm)
         self.assertEqual(vital_comp0.health, 90)
         self.assertEqual(vital_comp0.shield, 0)
         self.assertEqual(vital_comp1.health, 100)
