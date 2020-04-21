@@ -48,7 +48,7 @@ class SystemManager:
         self.systems[T.__name__] = T()
         self.systemBits[T.__name__] = bitset
 
-    def getSystem(self, T):
+    def get(self, T):
         """
         Get the instance of the System.
 
@@ -56,7 +56,7 @@ class SystemManager:
         """
         return self.systems[T.__name__]
 
-    def removeSystemEntity(self, T, entity):
+    def removeEntity(self, T, entity):
         """
         Remove an entity from a registered System.
 
@@ -65,7 +65,7 @@ class SystemManager:
         """
         self.systems[T.__name__].entities.discard(entity)
 
-    def removeAllEntity(self, entity):
+    def removeEntityAll(self, entity):
         """
         Remove an entity from all systems.
 
@@ -75,7 +75,7 @@ class SystemManager:
         for system in self.systems.values():
             system.entities.discard(entity)
 
-    def updateSystemEntity(self, entity, entityBitset):
+    def updateEntity(self, entity, entityBitset):
         """
         Update an entity bitset. Remove enitity from systems where the entity
         bitset in part does not match the system bitset. Add them to systems
