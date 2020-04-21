@@ -96,8 +96,7 @@ class TestECS(unittest.TestCase):
 
     def test_movement(self):
         ms = self.sm.getSystem(MovementSystem)
-        ms.update(1, self.state, self.cm.getComponentArr(Movement),
-                  self.cm.getComponentArr(LocationCartesian))
+        ms.update(1, self.state, self.cm)
 
         # Won't need to do any of the below in Game class
         loc_comps = self.cm.getComponentArr(LocationCartesian)
@@ -112,8 +111,8 @@ class TestECS(unittest.TestCase):
 
     def test_attack(self):
         atks = self.sm.getSystem(AttackSystem)
-        atks.update(1, self.state, self.cm.getComponentArr(Attack), self.cm.getComponentArr(Vital), self.cm.getComponentArr(LocationCartesian), self.cm.getComponentArr(Faction))
-        atks.update(1, self.state, self.cm.getComponentArr(Attack), self.cm.getComponentArr(Vital), self.cm.getComponentArr(LocationCartesian), self.cm.getComponentArr(Faction))
+        atks.update(1, self.state, self.cm)
+        atks.update(1, self.state, self.cm)
 
         vital_comps = self.cm.getComponentArr(Vital)
         vital_comp0 = vital_comps[self.e0.ID]
@@ -124,7 +123,7 @@ class TestECS(unittest.TestCase):
         self.assertEqual(vital_comp1.health, 100)
         self.assertEqual(vital_comp1.shield, 10)
 
-        atks.update(1, self.state, self.cm.getComponentArr(Attack), self.cm.getComponentArr(Vital), self.cm.getComponentArr(LocationCartesian), self.cm.getComponentArr(Faction))
+        atks.update(1, self.state, self.cm)
         self.assertEqual(vital_comp0.health, 90)
         self.assertEqual(vital_comp0.shield, 0)
         self.assertEqual(vital_comp1.health, 100)
