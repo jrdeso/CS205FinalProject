@@ -1,10 +1,19 @@
 import math
 
-from ..System import System
+from towerd.System import System
+from towerd.component.Attack import Attack
+from towerd.component.Faction import Faction
+from towerd.component.LocationCartesian import LocationCartesian
+from towerd.component.Vital import Vital
 
 
 class AttackSystem(System):
-    def update(self, dt, state, attackComps, vitalComps, locComps, factionComps):
+    def update(self, dt, state, component_manager):
+        attackComps = component_manager.getComponentArr(Attack)
+        factionComps = component_manager.getComponentArr(Faction)
+        locComps = component_manager.getComponentArr(LocationCartesian)
+        vitalComps = component_manager.getComponentArr(Vital)
+
         for entity in self.entities:
             tree = state["tree"]
             entityLocComp = locComps[entity.ID]
