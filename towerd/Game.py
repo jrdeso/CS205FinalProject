@@ -36,21 +36,21 @@ class Game:
 			if len(self.mobs) == 0:
 				self.wave += 1
 				self.current_wave = waves[self.wave]
-        else:
-            wave_enemies = [Mobs()]
+		else:
+			wave_enemies = [Mobs()]
 
             for x in range(len(self.current_wave)):
-                if self.current_wave[x] != 0:
-                    self.enemys.append(wave_enemies[x])
-                    self.current_wave[x] = self.current_wave[x] - 1
-                    break
+				if self.current_wave[x] != 0:
+					self.enemys.append(wave_enemies[x])
+					self.current_wave[x] = self.current_wave[x] - 1
+					break
 
     def gen_enemies(self): #This method handles all the waves generation
 
-    	if(self.current_wave = 0):
-    		if(len(self.enemies)) == 0:
-    			self.wave += 1 #We add a new wave
-    			self.current_wave = waves[self.wave]
+		if(self.current_wave = 0):
+			if(len(self.enemies)) == 0:
+				self.wave += 1 #We add a new wave
+				self.current_wave = waves[self.wave]
 
 
 
@@ -59,15 +59,31 @@ class Game:
 		run = True
 		clock = pygame.time.Clock() #To set the FPS of the game
 		while run:
-			clock.tick(60) #This runs the fame at 60 FPS
+			clock.tick(60) #This runs the fame at 60 FPS	
 
 
 			# main event loop
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-			pygame.display.update()
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					run = False
+
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_Q:
+						pos = pygame.mouse.get_pos()
+						if pos == :#i do not know how to check if the coords are valid for placing a tower
+							#draw archer tower
+					if event.key == pygame.K_W:
+						pos = pygame.mouse.get_pos()
+						if pos == :#same as before
+							#draw mage tower
+					if event.key == pygame.K_E:
+						pos = pygame.mouse.get_pos()
+						if pos == :#same as before
+							#draw melee tower
+
+					else:
+						
+
 
 			#in case the player loses
 			if self.lives <= 0:
@@ -75,7 +91,7 @@ class Game:
 
 
 
-			self.draw()
+
 
 
 
