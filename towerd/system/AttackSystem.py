@@ -8,11 +8,11 @@ from towerd.component.Vital import Vital
 
 
 class AttackSystem(System):
-    def update(self, dt, state, component_manager):
-        attackComps = component_manager.getComponentArr(Attack)
-        factionComps = component_manager.getComponentArr(Faction)
-        locComps = component_manager.getComponentArr(LocationCartesian)
-        vitalComps = component_manager.getComponentArr(Vital)
+    def update(self, dt, state, ecs_manager):
+        attackComps = ecs_manager.getComponentArr(Attack)
+        factionComps = ecs_manager.getComponentArr(Faction)
+        locComps = ecs_manager.getComponentArr(LocationCartesian)
+        vitalComps = ecs_manager.getComponentArr(Vital)
 
         for entity in self.entities:
             tree = state["tree"]

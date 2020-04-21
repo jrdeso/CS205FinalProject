@@ -12,13 +12,13 @@ class System(abc.ABC):
         self.entities = set()
 
     @abc.abstractmethod
-    def update(self, dt, state, component_manager):
+    def update(self, dt, state, ecs_manager):
         """
         Perform an update across all entities.
 
         :param dt: the amount of time passed since the last update
         :param state: the game state
-        :param component_manager: a ComponentManager for retrieving entity data
+        :param ecs_manager: a ECSManager for retrieving entity data
         """
         raise NotImplementedError
 
