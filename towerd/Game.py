@@ -19,6 +19,9 @@ class ECSManager:
     	self.width = 1350
     	self.height = 700
     	self.bg = pygame.image.load(os.path.join("FLA", "xxx.png")) #I was not able to find a decent free background for the game
+    	self.towers = []
+    	self.enemies = []
+    	self.lives = 100
 
 
     def update(self, dt, state):
@@ -40,7 +43,7 @@ class ECSManager:
         	tw.draw()
 
         for enm in self.enemies:
-        	tw.draw()
+        	enm.draw()
 
 
 
