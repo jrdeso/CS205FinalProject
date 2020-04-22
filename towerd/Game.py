@@ -7,16 +7,36 @@ import random
 pygame.mixer.music.load("xxx.mp3") #To play music while the game is running (still have to decided the track that we are going to play)
 
 class ECSManager:
+
+    def __init__(self):
+    	self.width = 1350
+    	self.height = 700
+    	self.bg = pygame.image.load(os.path.join("FLA", "xxx.png")) #I was not able to find a decent free background for the game
+
+
     def update(self, dt, state):
         time.sleep(random.random()) #update all systems
 
 
     def handle_input():
-        pass
+    	x, y = pygame.mouse.get_pos()
+    	name_list = ["buy_archer", "buy_mage", "buy_soldier"]
+    	object_list = []
 
 
     def draw():
         time.sleep(random.random())
+
+        self.blit(self.bg, (0, 0))
+
+        for tw in self.towers:
+        	tw.draw()
+
+        for enm in self.enemies:
+        	tw.draw()
+
+
+
 
 
 
@@ -53,6 +73,8 @@ while not quit:
     #handle quit
     if time.time() > quit_time:
     	quit = True
+
+
 
     
 
