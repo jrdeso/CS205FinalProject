@@ -21,7 +21,7 @@ class ECSManager:
     def handle_input():
     	x, y = pygame.mouse.get_pos()
     	name_list = ["buy_archer", "buy_mage", "buy_soldier"]
-    	object_list = []
+    	object_list = [Tower(2, x, y), Tower(3, x, y), Tower(1, x, y)]
 
 
     def draw():
