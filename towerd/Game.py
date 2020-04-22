@@ -3,8 +3,15 @@ import pygame
 import time
 import random
 
+pygame.font.ini()
+pygame.init()
+
 
 pygame.mixer.music.load("xxx.mp3") #To play music while the game is running (still have to decided the track that we are going to play)
+
+buy_archer = pygame.image.load(os.path.join("PNG", "24.png"))
+buy_mage = pygame.image.load(os.path.join("PNG", "26.png"))
+buy_soldier = pygame.image.load(os.path.join("PNG", "25.png"))
 
 class ECSManager:
 
