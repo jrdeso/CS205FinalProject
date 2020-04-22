@@ -10,18 +10,21 @@ class Entity:
 class EntityManager:
     def __init__(self, maxEntities):
         self.available = collections.deque(range(maxEntities))
-        self.bitsets = list((None,) * maxEntities)
+        self.bitsets = list((0,) * maxEntities)
         self.nActive = 0
 
-    def createEntity(self):
+    def create(self):
         self.nActive += 1
         eId = self.available.popleft()
         return Entity(eId)
 
-    def removeEntity(self, entity):
+    def remove(self, entity):
         self.bitsets[entity.ID] = 0
         self.available.append(entity.ID)
         self.nActive -= 1
+
+    def getBitset(self, entity):
+        return self.bitsets[entity.ID]
 
     def updateBitset(self, entity, bitset):
         if entity.ID > len(self.bitsets):

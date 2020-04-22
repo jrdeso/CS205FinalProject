@@ -9,3 +9,4 @@ class Attack:
     attackSpeed: float
     dmg: float
     target: Entity
+    attackable: bool

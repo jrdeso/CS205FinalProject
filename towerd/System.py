@@ -12,14 +12,13 @@ class System(abc.ABC):
         self.entities = set()
 
     @abc.abstractmethod
-    def update(self, dt, state, *args, **kwargs):
+    def update(self, dt, state, ecs_manager):
         """
         Perform an update across all entities.
 
         :param dt: the amount of time passed since the last update
         :param state: the game state
-        :param args: any number of arguments
-        :param kwargs: any number of keyword arguments
+        :param ecs_manager: a ECSManager for retrieving entity data
         """
         raise NotImplementedError
 
@@ -49,7 +48,7 @@ class SystemManager:
         self.systems[T.__name__] = T()
         self.systemBits[T.__name__] = bitset
 
-    def getSystem(self, T):
+    def get(self, T):
         """
         Get the instance of the System.
 
@@ -57,7 +56,7 @@ class SystemManager:
         """
         return self.systems[T.__name__]
 
-    def removeSystemEntity(self, T, entity):
+    def removeEntity(self, T, entity):
         """
         Remove an entity from a registered System.
 
@@ -66,7 +65,7 @@ class SystemManager:
         """
         self.systems[T.__name__].entities.discard(entity)
 
-    def removeAllEntity(self, entity):
+    def removeEntityAll(self, entity):
         """
         Remove an entity from all systems.
 
@@ -76,7 +75,7 @@ class SystemManager:
         for system in self.systems.values():
             system.entities.discard(entity)
 
-    def updateSystemEntity(self, entity, entityBitset):
+    def updateEntity(self, entity, entityBitset):
         """
         Update an entity bitset. Remove enitity from systems where the entity
         bitset in part does not match the system bitset. Add them to systems

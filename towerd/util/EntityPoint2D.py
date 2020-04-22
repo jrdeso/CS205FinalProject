@@ -1,7 +1,7 @@
 class EntityPoint2D:
-    def __init__(self, x, y, entities=None):
+    def __init__(self, x, y, entity):
         self.coords = (x, y)
-        self.entities = entities or []
+        self.entity = entity
 
     def __len__(self):
         return len(self.coords)
