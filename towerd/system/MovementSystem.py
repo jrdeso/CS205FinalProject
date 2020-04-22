@@ -1,11 +1,16 @@
 import math
 
-from ..System import System
+from towerd.System import System
+from towerd.component.Movement import Movement
+from towerd.component.LocationCartesian import LocationCartesian
 
 
 class MovementSystem(System):
-    def update(self, dt, state, movementComps, locComps):
+    def update(self, dt, state, ecs_manager):
         for entity in self.entities:
+            movementComps = ecs_manager.getComponentArr(Movement)
+            locComps = ecs_manager.getComponentArr(LocationCartesian)
+
             movementComp = movementComps[entity.ID]
             speed = movementComp.speed
             fromNode = movementComp.fromNode

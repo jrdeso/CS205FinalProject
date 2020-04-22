@@ -27,7 +27,7 @@ class ComponentManager:
         self.components[T.__name__] = len(self.componentArrs)
         self.componentArrs.append(MappedPackedArray(self.maxEntities))
 
-    def getComponentBits(self, *Ts):
+    def getBitset(self, *Ts):
         """
         Get a bitset uniquely identifying the component class that are
         specified.
@@ -40,7 +40,7 @@ class ComponentManager:
             componentBits |= 1 << bitshift
         return componentBits
 
-    def getComponentArr(self, T):
+    def getArr(self, T):
         """
         Get a packed array of components associated with an entity.
 
@@ -48,7 +48,7 @@ class ComponentManager:
         """
         return self.componentArrs[self.components[T.__name__]]
 
-    def addComponent(self, component, entity):
+    def add(self, component, entity):
         """
         Associate an instance of a component with an entity.
 
@@ -58,7 +58,7 @@ class ComponentManager:
         idx = self.components[component.__class__.__name__]
         self.componentArrs[idx].append(component, key=entity.ID)
 
-    def removeComponent(self, T, entity):
+    def removeEntity(self, T, entity):
         """
         Remove components of type T with an entity.
 
@@ -68,7 +68,7 @@ class ComponentManager:
         idx = self.components[T.__name__]
         self.componentArrs[idx].removeKey(entity.ID)
 
-    def removeAll(self, entity):
+    def removeEntityAll(self, entity):
         """
         Remove all components associated with an entity
 
