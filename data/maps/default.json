@@ -1,0 +1,62 @@
+{
+    "map": {
+        "0": {
+            "type": "path_start",
+            "coord": [0.1, 0.1],
+            "edges": [
+                "1"
+            ]
+        },
+        "1": {
+            "type": "path",
+            "coord": [0.3, 0.1],
+            "edges": [
+                "2"
+            ]
+        },
+        "2": {
+            "type": "path",
+            "coord": [0.3, 0.5],
+            "edges": [
+                "4"
+            ]
+        },
+        "3": {
+            "type": "path_start",
+            "coord": [0.1, 0.5],
+            "edges": [
+                "2"
+            ]
+        },
+        "4": {
+            "type": "path_end",
+            "coord": [0.3, 0.7],
+            "edges": []
+        },
+        "6": {
+            "type": "tower",
+            "coord": [0.2, 0.2],
+            "edges": []
+        },
+        "7": {
+            "type": "tower",
+            "coord": [0.4, 0.1],
+            "edges": []
+        },
+        "8": {
+            "type": "tower",
+            "coord": [0.4, 0.3],
+            "edges": []
+        },
+        "9": {
+            "type": "tower",
+            "coord": [0.4, 0.5],
+            "edges": []
+        },
+        "10": {
+            "type": "tower",
+            "coord": [0.4, 0.7],
+            "edges": []
+        }
+    }
+}

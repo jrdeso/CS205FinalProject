@@ -1,0 +1,12 @@
+{
+    "class": "mob",
+    "attributes": {
+        "type": "orc",
+        "health": 100,
+        "damage": 2,
+        "attack_speed": 1,
+        "attack_range": 0.01,
+        "movement_speed": 1,
+        "coins": 10
+    }
+}
