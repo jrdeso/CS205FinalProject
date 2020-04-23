@@ -37,6 +37,7 @@ class SpawnSystem(System):
             # Get x and y coords from a random path_start
             pathStartX = random.choice(list(pathStartCoords))
             pathStartY = pathStartCoords[pathStartX]
+            
             ecs_manager.addEntityComponent(mob, LocationCartesian(pathStartX, pathStartY))
             ecs_manager.addEntityComponent(mob, Vital(100, 10))
             ecs_manager.addEntityComponent(mob, Movement(0.3, PathType.PATH_START.id, PathType.PATH_END.id))
