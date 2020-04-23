@@ -10,23 +10,35 @@ from towerd.component.Vital import Vital
 class SpawnSystem(System):
     def update(self, dt, state, ecs_manager):
         # Get path_start
-        #TODO Not sure how to do this, need to get the info from Game
-        pathStartX = 0
-        pathStartY = 0
+        for mapNode in state.map:
+            if(mapNode.pathType == 'path_start'):
+                # This is the start of the path get x and y coordinates
+                pathStartX = mapNode.x
+                pathStartY = mapNode.y
 
         # Get the number of mobs based on what wave it is
-        #TODO Not sure how to do this, need to get the info from Game
-        numMobs = 10
+        waveNum = state.wave
+        numMobs = 0
+        if(waveNum == 1):
+            numMobs = 5
+        elif(waveNum == 2):
+            numMobs = 10
+        elif(waveNum == 3):
+            numMobs = 15
+        elif(waveNum == 4):
+            numMobs = 20
+        elif(waveNum == 5):
+            numMobs = 25
 
         # create the  mobs
         for i in range(numMobs):
-            mob = self.ecsm.createEntity()
+            mob = ecs_manager.createEntity()
 
-            self.ecsm.addEntityComponent(mob, LocationCartesian(pathStartX, pathStartY))
-            self.ecsm.addEntityComponent(mob, Vital(100, 10))
-            self.ecsm.addEntityComponent(mob, Movement(0.3, PathType.PATH_START.id, PathType.PATH_END.id))
-            self.ecsm.addEntityComponent(mob, Attack(0.01, 2, 5, None, True))
-            self.ecsm.addEntityComponent(mob, Faction(0))
+            ecs_manager.addEntityComponent(mob, LocationCartesian(pathStartX, pathStartY))
+            ecs_manager.addEntityComponent(mob, Vital(100, 10))
+            ecs_manager.addEntityComponent(mob, Movement(0.3, PathType.PATH_START.id, PathType.PATH_END.id))
+            ecs_manager.addEntityComponent(mob, Attack(0.01, 2, 5, None, True))
+            ecs_manager.addEntityComponent(mob, Faction(0))
 
-            self.state['entities'][mob.ID] = mob
-            setattr(self, f'e{i}', mob)
+            # TODO not sure what to put in the dictionary
+            state.entites.update({mob : 0})
