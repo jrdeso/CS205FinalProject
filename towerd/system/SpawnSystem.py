@@ -11,11 +11,11 @@ from towerd.component.Vital import Vital
 class SpawnSystem(System):
     def update(self, dt, state, ecs_manager):
         # Get all path_start x and y coords and add them to a dictionary
-        pathStartCoords = {}
-        for mapNode in state.map:
-            if(mapNode.pathType == 'path_start'):
+        pathStartCoords = []
+        for mapNode in state.map.nodes:
+            if mapNode.pathType == 'path_start':
                 # This is a start of the path, get x and y coordinates
-                pathStartCoords.update({mapNode.x : mapNode.y})
+                pathStartCoords.append(mapNode)
 
         # Get the number of mobs based on what wave it is
         waveNum = state.wave
@@ -35,9 +35,10 @@ class SpawnSystem(System):
         for i in range(numMobs):
             mob = ecs_manager.createEntity()
             # Get x and y coords from a random path_start
-            pathStartX = random.choice(list(pathStartCoords))
-            pathStartY = pathStartCoords[pathStartX]
-            
+            pathStartNode = random.choice(pathStartCoords)
+            pathStartX = pathStartNode.x
+            pathStartY = pathStartNode.y
+
             ecs_manager.addEntityComponent(mob, LocationCartesian(pathStartX, pathStartY))
             ecs_manager.addEntityComponent(mob, Vital(100, 10))
             ecs_manager.addEntityComponent(mob, Movement(0.3, PathType.PATH_START.id, PathType.PATH_END.id))
