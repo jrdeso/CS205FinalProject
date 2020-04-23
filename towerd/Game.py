@@ -87,11 +87,18 @@ class Game:
         Create entity at the location. Usually should only be used for towers
         or debugging mobs.
         """
+        def process_json(filepath):
+            with open(_R.tower.archer_tower) as f:
+                jsonLines = f.readlines()
+                jsonArr = [line.strip for line in jsonLines]
+                jsonString = ''.join(jsonArr)
+            return jsonString
+
         if entityType == GameEntityType.ArcherTower:
-            attributes = json.loads(_R.tower.archer_tower)
+            attributes = json.loads(process_json(_R.tower.archer_tower))
             # TODO Assign attributes to components
         elif entityType == GameEntityType.Orc:
-            attributes = json.loads(_R.mob.orc)
+            attributes = json.loads(process_json(_R.mob.orc))
             # TODO Assign attributes to components
 
     def setupGameState(self, jsonMap):
