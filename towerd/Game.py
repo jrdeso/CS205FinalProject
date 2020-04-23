@@ -95,10 +95,10 @@ class Game:
             return jsonString
 
         if entityType == GameEntityType.ArcherTower:
-            attributes = json.loads(process_json(_R.tower.archer_tower))
+            obj = json.loads(process_json(_R.tower.archer_tower))
             # TODO Assign attributes to components
         elif entityType == GameEntityType.Orc:
-            attributes = json.loads(process_json(_R.mob.orc))
+            obj = json.loads(process_json(_R.mob.orc))
             # TODO Assign attributes to components
 
     def setupGameState(self, jsonMap):
