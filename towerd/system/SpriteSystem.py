@@ -1,3 +1,4 @@
+import pygame
 
 from towerd.System import System
 from towerd.component.Attack import Attack
@@ -18,3 +19,21 @@ class SpriteSystem(System):
         # update locations for each entity
         for entity in self.entities:
             entityLocComp = locComps[entity.ID]
+
+            EntitySprite.x = LocationCartesian.x
+            EntitySprite.y = LocationCartesian.y
+
+
+    def draw(self, SpriteEntity):
+        """
+        Method used to draw a sprite
+        :param SpriteEntity: Represents a sprite
+        """
+
+        # initialize sprite
+        pygame.sprite.Sprite.__init__(SpriteEntity)
+
+        image = pygame.Surface(SpriteEntity)  # Note: This could be where image is loaded from saved files
+                                                    # See further pygame docs for info on how this is done
+        pygame.sprite.Sprite.update()
+
