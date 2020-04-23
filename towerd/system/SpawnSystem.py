@@ -1,3 +1,4 @@
+import random
 from ..Map import Map, PathType
 
 from towerd.System import System
@@ -9,12 +10,12 @@ from towerd.component.Vital import Vital
 
 class SpawnSystem(System):
     def update(self, dt, state, ecs_manager):
-        # Get path_start
+        # Get all path_start x and y coords and add them to a dictionary
+        pathStartCoords = {}
         for mapNode in state.map:
             if(mapNode.pathType == 'path_start'):
-                # This is the start of the path get x and y coordinates
-                pathStartX = mapNode.x
-                pathStartY = mapNode.y
+                # This is a start of the path, get x and y coordinates
+                pathStartCoords.update({mapNode.x : mapNode.y})
 
         # Get the number of mobs based on what wave it is
         waveNum = state.wave
@@ -33,12 +34,13 @@ class SpawnSystem(System):
         # create the  mobs
         for i in range(numMobs):
             mob = ecs_manager.createEntity()
-
+            # Get x and y coords from a random path_start
+            pathStartX = random.choice(list(pathStartCoords))
+            pathStartY = pathStartCoords[pathStartX]
             ecs_manager.addEntityComponent(mob, LocationCartesian(pathStartX, pathStartY))
             ecs_manager.addEntityComponent(mob, Vital(100, 10))
             ecs_manager.addEntityComponent(mob, Movement(0.3, PathType.PATH_START.id, PathType.PATH_END.id))
             ecs_manager.addEntityComponent(mob, Attack(0.01, 2, 5, None, True))
             ecs_manager.addEntityComponent(mob, Faction(0))
 
-            # TODO not sure what to put in the dictionary
-            state.entites.update({mob : 0})
+            #state.entites.update({mob : 0})
