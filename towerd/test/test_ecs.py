@@ -114,5 +114,9 @@ class TestECS(unittest.TestCase):
 
         for i in range(4, self.maxEntities):
             locComp = self.ecsm.getEntityComponent(self.state['entities'][i], LocationCartesian)
+            moveComp = self.ecsm.getEntityComponent(self.state['entities'][i], Movement)
             self.assertEqual(self.n1.x, locComp.x)
             self.assertEqual(self.n1.y, locComp.y)
+            self.assertEqual(self.n1.id, moveComp.fromNode)
+            self.assertEqual(self.n2.id, moveComp.destNode)
+
