@@ -1,37 +1,137 @@
+import dataclasses
+import enum
+import json
+import kdtree
 import os
 import pygame
 
+from ECS import ECSManager
+from Map import Map, PathType
+from component.LocationCartesian import LocationCartesian
+from component.LocationNode import LocationNode
+from component.Movement import Movement
+from component.Vital import Vital
+from component.Attack import Attack
+from component.Faction import Faction
+from system.MovementSystem import MovementSystem
+from system.AttackSystem import AttackSystem
+from util.EntityPoint2D import EntityPoint2D
+
+from Resources import Resources
+_R = Resources('../data/resources.json', gatherFromDir=True)
+
+MAX_ENTITIES = 128
+
+
+@dataclasses.dataclass
+class GameState:
+    entities: dict = {}
+    dynamicTree: object = None
+    staticTree: object = None
+
+    map: Map = None
+
+    wave: int = 0
+    waveInProgress: bool = False
+
+
+class GameEntityType(enum.IntEnum):
+    ArcherTower = enum.auto()
+    Orc = enum.auto()
+
+
 class Game:
-	def __init__(self):
-		self.width = 1200 #Width of the pygame window
-		self.height = 700 #Height of the pygame window
-		self.win = pygame.display.set_mode((self.width, self.height))
-		self.enemies = []
-		self.towers = []
-		self.player_lives = 20
-		self.player_money = 1000
-		self.background = pygame.image.load(os.path.join("xxxxxxx", "xxxxx.png"))
-		self.background = pygame.transform.scale(self.background, (self.width, self.height))
+    def __init__(self):
+        self.width = 1200
+        self.height = 700
 
+        self.run = False
+        self.ecsm = ECSManager(MAX_ENTITIES)
+        self.state = None
 
+        self.createWindow()
 
-	def run(self): #This is the run method to control all the dynamics of the game
-		run = True
-		clock = pygame.time.Clock() #To set the FPS of the game
-		while run:
-			clock.tick(60) #This runs the fame at 60 FPS
+    def createWindow(self):
+        self.win = pygame.display.set_mode((self.width, self.height))
+        self.background = pygame.image.load(os.path.join("xxxxxxx", "xxxxx.png"))
+        self.background = pygame.transform.scale(self.background, (self.width, self.height))
 
+        pygame.mixer.music.load("xxx.mp3")
+        pygame.mixer.music.play(loops=-1)
 
-			# main event loop
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-			pygame.display.update()
+    def handleInput(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_Q:
+                    pos = pygame.mouse.get_pos()
+                    if pos:
+                        # create archer tower
+                        pass
+                if event.key == pygame.K_W:
+                    pos = pygame.mouse.get_pos()
+                    if pos:
+                        # create mage tower
+                        pass
+                if event.key == pygame.K_E:
+                    pos = pygame.mouse.get_pos()
+                    if pos:
+                        # create melee tower
+                        pass
+                else:
+                    pass
 
+    def createEntity(self, x, y, entityType):
+        """
+        Create entity at the location. Usually should only be used for towers
+        or debugging mobs.
+        """
+        if entityType == GameEntityType.ArcherTower:
+            attributes = json.loads(_R.tower.archer_tower)
+            # TODO Assign attributes to components
+        elif entityType == GameEntityType.Orc:
+            attributes = json.loads(_R.mob.orc)
+            # TODO Assign attributes to components
 
-	#def draw(self):
-	#	self.win.blit(self.background, (0, 0))
-	#	pygame.display.update()
+    def setupGameState(self, jsonMap):
+        self.state = GameState()
+        self.state.map = Map(map_json=jsonMap)
+        self.state.dynamic_tree = kdtree.create(dimensions=2)
+        self.state.static_tree = kdtree.create(dimensions=2)
 
+    def setupECS(self):
+        self.ecsm = ECSManager(5)
+        self.ecsm.registerComponent(LocationCartesian)
+        self.ecsm.registerComponent(LocationNode)
+        self.ecsm.registerComponent(Movement)
+        self.ecsm.registerComponent(Vital)
+        self.ecsm.registerComponent(Attack)
+        self.ecsm.registerComponent(Faction)
 
+        self.ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
+        self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
+
+    def run(self, mapPath):
+        self.run = True
+
+        self.setupAssets()
+        self.setupGameState()
+        self.setupECS()
+
+        movementSystem = self.ecsm.getSystem(MovementSystem)
+        attackSystem = self.ecsm.getSystem(AttackSystem)
+
+        dt = 0
+        clock = pygame.time.Clock()
+        while self.run:
+            self.handleInput()
+
+            movementSystem.update(dt, self.state, self.ecsm)
+            attackSystem.update(dt, self.state, self.ecsm)
+
+            self.draw()
+            dt = clock.tick(60)
+
+    def draw():
+        pass
