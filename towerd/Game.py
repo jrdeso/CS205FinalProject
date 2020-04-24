@@ -96,10 +96,30 @@ class Game:
 
         if entityType == GameEntityType.ArcherTower:
             obj = json.loads(process_json(_R.tower.archer_tower))
-            # TODO Assign attributes to components
+            tower_ent = self.ecsm.createEntity()
+            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
+            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.5, attackSpeed = 2, dmg = 7, target = None, attackable = False))
+            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
         elif entityType == GameEntityType.Orc:
             obj = json.loads(process_json(_R.mob.orc))
-            # TODO Assign attributes to components
+            ent = self.ecsm.createEntity()
+            self.ecsm.addEntityComponent(ent, LocationCartesian(x, y))
+            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 10, target = None, attackable = True))
+            self.ecsm.addEntityComponent(ent, Vital(100, 10))
+            self.ecsm.addEntityComponent(ent, Faction(faction=0))
+        elif entityType == GameEntityType.MageTower:
+            obj = json.loads(process_json(_R.tower.mage_tower))
+            tower_ent = self.ecsm.createEntity()
+            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
+            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.3, attackSpeed = 1, dmg = 10, target = None, attackable = False))
+            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
+        elif entityType == GameEntityType.SoldierTower:
+            obj = json.loads(process_json(_R.tower.soldier_tower))
+            tower_ent = self.ecsm.createEntity()
+            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
+            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 4, target = None, attackable = False))
+            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
+
 
     def setupGameState(self, jsonMap):
         self.state = GameState()
