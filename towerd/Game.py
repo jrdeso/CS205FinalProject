@@ -37,6 +37,8 @@ class GameState:
 
 class GameEntityType(enum.IntEnum):
     ArcherTower = enum.auto()
+    MageTower = enum.auto()
+    SoldierTower = enum.auto()
     Orc = enum.auto()
 
 
