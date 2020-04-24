@@ -1,35 +1,58 @@
 import pygame
 
 from towerd.System import System
-from towerd.component.Attack import Attack
-from towerd.component.Movement import Movement
 from towerd.component.Faction import Faction
 from towerd.component.LocationCartesian import LocationCartesian
-from towerd.component.Vital import Vital
-
-from towerd.component.EntitySprite import EntitySprite
+from towerd.component.Sprite import Sprite
 
 
 class SpriteSystem(System):
+    def __init__(self):
+        super().__init__()
+        self.entitySprite = {}
+        self.allSprites = pygame.sprite.Group()
+
     def update(self, dt, state, ecs_manager):
         locComps = ecs_manager.getComponentArr(LocationCartesian)
-        spriteComps = ecs_manager.getComponentArr(EntitySprite)
+        factionComps = ecs_manager.getComponentArr(Faction)
+        spriteComps = ecs_manager.getComponentArr(Sprite)
 
-
-        # update locations for each entity  - add all sprites to the group
+        # update locations for each entity - add all sprites to the group
         for entity in self.entities:
-            entityLocComp = locComps[entity.ID]
-            # locations
-            EntitySprite.x = LocationCartesian.x
-            EntitySprite.y = LocationCartesian.y
+            locComp = locComps[entity.ID]
+            factionComp = factionComps[entity.ID]
+            spriteComp = spriteComps[entity.ID]
 
-            # sprite groupings
-            pygame.sprite.Group.add(spriteComps)
+            if entity.ID not in self.entitySprite:
+                self.entitySprite[entity.ID] = EntitySprite(locComp.x, locComp.y, spriteComp.path)
+                self.allSprites.add(spriteComps)
 
+            sprite = self.entitySpriteMapping[entity.ID]
+            sprite.update(locComp.x, locComp.y)
 
-
-    def draw(self):
+    def drawSprites(self, screen):
         """
         Method used to the groupings of sprites stored from update
         """
-        pygame.sprite.draw()
+        self.allSprites.draw(screen)
+
+
+class EntitySprite(pygame.sprite.Sprite):
+    def __init__(self, x, y, spritePath):
+        self.x = x
+        self.y = y
+
+        self.spritePath = spritePath
+
+        self.image = pygame.image.load(self.spritePath)
+        self.rect = self.image.get_rect()
+        # Note this may be where we also store on hand image file of sprite for use
+        # could allow use for each entity to render through sprite system
+
+    def update(self, x, y):
+        self.x = x
+        self.y = y
+
+        # TODO: x, y coords are scaled. Automatrically adjust to screen size.
+        self.rect.x = self.x
+        self.rect.y = self.y
