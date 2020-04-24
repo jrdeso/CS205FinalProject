@@ -14,8 +14,8 @@ class EntityManager:
         self.nActive = 0
 
     def create(self):
-        self.nActive += 1
         eId = self.available.popleft()
+        self.nActive += 1
         return Entity(eId)
 
     def remove(self, entity):

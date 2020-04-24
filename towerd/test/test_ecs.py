@@ -12,23 +12,26 @@ from ..component.Attack import Attack
 from ..component.Faction import Faction
 from ..system.MovementSystem import MovementSystem
 from ..system.AttackSystem import AttackSystem
+from ..system.SpawnSystem import SpawnSystem
 from ..Map import Map, PathType
 
 
 class TestECS(unittest.TestCase):
     def setUp(self):
         self.map = Map()
-        n1 = self.map.addNode(PathType.PATH_START, 0.15, 0.2)
-        n2 = self.map.addNode(PathType.PATH_END, 0.9, 0.2)
-        n3 = self.map.addNode(PathType.TOWER, 0.2, 0.1)
-        self.map.addEdge(n1, n2)
+        self.n1 = self.map.addNode(PathType.PATH_START, 0.15, 0.2)
+        self.n2 = self.map.addNode(PathType.PATH_END, 0.9, 0.2)
+        self.n3 = self.map.addNode(PathType.TOWER, 0.2, 0.1)
+        self.map.addEdge(self.n1, self.n2)
 
         self.state = {}
+        self.state['wave'] = 0
         self.state['map'] = self.map
         self.state['entities'] = {}
 
         # Initial ECS setup
-        self.ecsm = ECSManager(5)
+        self.maxEntities = 5
+        self.ecsm = ECSManager(self.maxEntities)
         self.ecsm.registerComponent(LocationCartesian)
         self.ecsm.registerComponent(LocationNode)
         self.ecsm.registerComponent(Movement)
@@ -38,6 +41,7 @@ class TestECS(unittest.TestCase):
 
         self.ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
         self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
+        self.ecsm.registerSystem(SpawnSystem)
 
         # Make mobs
         self.orig_coords = [(0.15, 0.2), (0.2, 0.2)]
@@ -45,7 +49,7 @@ class TestECS(unittest.TestCase):
             ent = self.ecsm.createEntity()
             self.ecsm.addEntityComponent(ent, LocationCartesian(*self.orig_coords[i]))
             self.ecsm.addEntityComponent(ent, Vital(100, 10))
-            self.ecsm.addEntityComponent(ent, Movement(0.3, n1.id, n2.id))
+            self.ecsm.addEntityComponent(ent, Movement(0.3, self.n1.id, self.n2.id))
             self.ecsm.addEntityComponent(ent, Attack(attackRange=0.01, attackSpeed=2, dmg=5, target=None, attackable=True))
             self.ecsm.addEntityComponent(ent, Faction(faction=0))
 
@@ -53,7 +57,7 @@ class TestECS(unittest.TestCase):
             setattr(self, f'e{i}', ent)
 
         # Make tower
-        tower_node = n3
+        tower_node = self.n3
         tower_ent = self.ecsm.createEntity()
         self.ecsm.addEntityComponent(tower_ent, LocationNode(tower_node.id))
         self.ecsm.addEntityComponent(tower_ent, LocationCartesian(tower_node.x, tower_node.y))
@@ -98,3 +102,21 @@ class TestECS(unittest.TestCase):
         self.assertEqual(vital_comp0.shield, 0)
         self.assertEqual(vital_comp1.health, 100)
         self.assertEqual(vital_comp1.shield, 10)
+
+    def test_spawn(self):
+        ss = self.ecsm.getSystem(SpawnSystem)
+
+        self.state['wave'] = 1
+        ss.update(0, self.state, self.ecsm)
+        self.state['waveInProgress'] = True
+
+        self.assertEquals(self.ecsm.em.nActive, 5)
+
+        for i in range(4, self.maxEntities):
+            locComp = self.ecsm.getEntityComponent(self.state['entities'][i], LocationCartesian)
+            moveComp = self.ecsm.getEntityComponent(self.state['entities'][i], Movement)
+            self.assertEqual(self.n1.x, locComp.x)
+            self.assertEqual(self.n1.y, locComp.y)
+            self.assertEqual(self.n1.id, moveComp.fromNode)
+            self.assertEqual(self.n2.id, moveComp.destNode)
+
