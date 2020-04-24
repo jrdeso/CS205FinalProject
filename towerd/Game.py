@@ -71,15 +71,15 @@ class Game:
                 if event.key == pygame.K_Q:
                     pos = pygame.mouse.get_pos()
                     if pos:
-                        createEntity(pos[0], pos[1], archer_tower)
+                        self.createEntity(pos[0], pos[1], GameEntityType.ArcherTower)
                 if event.key == pygame.K_W:
                     pos = pygame.mouse.get_pos()
                     if pos:
-                        createEntity(pos[0], pos[1], mage_tower)
+                        self.createEntity(pos[0], pos[1], GameEntityType.MageTower)
                 if event.key == pygame.K_E:
                     pos = pygame.mouse.get_pos()
                     if pos:
-                        createEntity(pos[0], pos[1], soldier_tower)
+                        self.createEntity(pos[0], pos[1], GameEntityType.SoldierTower)
                 else:
                     return False
 
