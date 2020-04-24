@@ -16,25 +16,20 @@ class SpriteSystem(System):
         spriteComps = ecs_manager.getComponentArr(EntitySprite)
 
 
-        # update locations for each entity
+        # update locations for each entity  - add all sprites to the group
         for entity in self.entities:
             entityLocComp = locComps[entity.ID]
-
+            # locations
             EntitySprite.x = LocationCartesian.x
             EntitySprite.y = LocationCartesian.y
 
+            # sprite groupings
+            pygame.sprite.Group.add(spriteComps)
 
-    def draw(self, SpriteEntity):
+
+
+    def draw(self):
         """
-        Method used to draw a sprite
-        :param SpriteEntity: Represents a sprite
+        Method used to the groupings of sprites stored from update
         """
-
-        # initialize sprite
-        pygame.sprite.Sprite.__init__(SpriteEntity)
-
-        image = pygame.Surface(SpriteEntity)  # Note: This could be where image is loaded from saved files
-                                                    # See further pygame docs for info on how this is done
-                                                # see EntitySprite for details-could load image there and use it here
-        pygame.sprite.Sprite.update()
-
+        pygame.sprite.draw()
