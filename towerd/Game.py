@@ -7,6 +7,7 @@ import pygame
 
 from ECS import ECSManager
 from Map import Map, PathType
+from component.Coin import Coin
 from component.LocationCartesian import LocationCartesian
 from component.LocationNode import LocationNode
 from component.Movement import Movement
@@ -25,6 +26,7 @@ MAX_ENTITIES = 128
 
 @dataclasses.dataclass
 class GameState:
+    player: object = None
     entities: dict = {}
     dynamicTree: object = None
     staticTree: object = None
@@ -119,6 +121,15 @@ class Game:
             self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 4, target = None, attackable = False))
             self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
 
+    def addPlayer(self, health=100, default_coins=100):
+        player_id = len(self.state.player)
+
+        player = self.ecsm.createEntity()
+        self.ecsm.addEntityComponent(player, Vital(health, 0))
+        self.ecsm.addEntityComponent(player, Coin(default_coins))
+        self.ecsm.addEntityComponent(player, Faction(player_id))
+
+        self.state.player[player_id] = player
 
     def setupGameState(self, jsonMap):
         self.state = GameState()
@@ -128,6 +139,7 @@ class Game:
 
     def setupECS(self):
         self.ecsm = ECSManager(5)
+        self.ecsm.registerComponent(Coin)
         self.ecsm.registerComponent(LocationCartesian)
         self.ecsm.registerComponent(LocationNode)
         self.ecsm.registerComponent(Movement)
