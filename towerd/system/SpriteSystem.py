@@ -35,5 +35,6 @@ class SpriteSystem(System):
 
         image = pygame.Surface(SpriteEntity)  # Note: This could be where image is loaded from saved files
                                                     # See further pygame docs for info on how this is done
+                                                # see EntitySprite for details-could load image there and use it here
         pygame.sprite.Sprite.update()
 
