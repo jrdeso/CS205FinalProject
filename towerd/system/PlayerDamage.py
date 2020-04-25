@@ -1,5 +1,3 @@
-import math
-
 from towerd.System import System
 from towerd.Map import PathType
 from towerd.component.Attack import Attack
