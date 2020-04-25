@@ -23,17 +23,18 @@ from towerd.Resources import Resources
 MAX_ENTITIES = 128
 
 
-@dataclasses.dataclass
 class GameState:
-    player: object = None
-    entities: dict = {}
-    dynamicTree: object = None
-    staticTree: object = None
+    def __init__(self):
+        self.player = None
 
-    map: Map = None
+        self.entities = {}
+        self.dynamicTree = kdtree.create(dimensions=2)
+        self.staticTree = kdtree.create(dimensions=2)
 
-    wave: int = 0
-    waveInProgress: bool = False
+        self.map = None
+
+        self.wave = 0
+        self.waveInProgress = False
 
 
 class GameEntityType(enum.IntEnum):
