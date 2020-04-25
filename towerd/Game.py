@@ -20,7 +20,17 @@ from towerd.util.EntityPoint2D import EntityPoint2D
 
 from towerd.Resources import Resources
 
+R_PATHS = Resources(
+    os.path.join(os.environ["DATA_DIR"], "resources.json"), mapFromDir=True
+)
+print(R_PATHS.mob.orc)
 MAX_ENTITIES = 128
+
+
+def processJson(filepath):
+    with open(filepath) as f:
+        jsonString = "".join([line.strip() for line in f.readlines()])
+    return json.loads(jsonString)
 
 
 class GameState:
@@ -38,19 +48,16 @@ class GameState:
 
 
 class GameEntityType(enum.IntEnum):
-    ArcherTower = enum.auto()
-    MageTower = enum.auto()
-    SoldierTower = enum.auto()
-    Orc = enum.auto()
+    ARCHER_TOWER = enum.auto()
+    MAGE_TOWER = enum.auto()
+    SOLDIER_TOWER = enum.auto()
+    ORC = enum.auto()
 
 
 class Game:
     def __init__(self, width, height, datadir):
         self.width = width
         self.height = height
-
-        resourcePath = os.path.join(datadir, "resources.json")
-        self.R = Resources(resourcePath, mapFromDir=True)
 
         self.running = False
         self.ecsm = ECSManager(MAX_ENTITIES)
@@ -71,71 +78,87 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
+                # TODO: Get the node id mapped to with a clickable region.
+                # Change None to node id.
                 if event.key == pygame.locals.K_q:
                     pos = pygame.mouse.get_pos()
-                    self.createEntity(pos[0], pos[1], GameEntityType.ArcherTower)
+                    Game.createTower(
+                        self.ecsm, self.state, GameEntityType.ARCHER_TOWER, None
+                    )
                 if event.key == pygame.locals.K_w:
                     pos = pygame.mouse.get_pos()
-                    self.createEntity(pos[0], pos[1], GameEntityType.MageTower)
+                    Game.createTower(
+                        self.ecsm, self.state, GameEntityType.MAGE_TOWER, None
+                    )
                 if event.key == pygame.locals.K_e:
                     pos = pygame.mouse.get_pos()
-                    self.createEntity(pos[0], pos[1], GameEntityType.SoldierTower)
+                    Game.createTower(
+                        self.ecsm, self.state, GameEntityType.SOLDIER_TOWER, None
+                    )
 
     @staticmethod
-    def processJson(filepath):
-        with open(filepath) as f:
-            jsonLines = f.readlines()
-            jsonArr = [line.strip for line in jsonLines]
-            jsonString = "".join(jsonArr)
-        return json.loads(jsonString)
+    def createTower(ecsm, state, entityType, nodeID):
+        try:
+            ent = ecsm.createEntity()
+        except IndexError:
+            return None
+        node = state.map.nodes[nodeID]
 
-    def createTower(self, entityType, nodeID):
-        ent = self.ecsm.createEntity()
-        node = self.map.nodes[nodeID]
+        attrPath = None
+        if entityType == GameEntityType.ARCHER_TOWER:
+            attrPath = R_PATHS.tower.archer_tower
+        elif entityType == GameEntityType.MAGE_TOWER:
+            attrPath = R_PATHS.tower.mage_tower
+        elif entityType == GameEntityType.SOLDIER_TOWER:
+            attrPath = R_PATHS.tower.soldier_tower
+        attr = processJson(attrPath)
 
-        attr = None
-        if entityType == GameEntityType.ArcherTower:
-            attr = Game.processJson(self.R.tower.archer_tower)
-        elif entityType == GameEntityType.MageTower:
-            attr = Game.processJson(self.R.tower.mage_tower)
-        elif entityType == GameEntityType.SoldierTower:
-            attr = Game.processJson(self.R.tower.soldier_tower)
-
-        self.ecsm.addEntityComponent(ent, LocationCartesian(node.x, node.y))
-        self.ecsm.addEntityComponent(
+        ecsm.addEntityComponent(ent, LocationCartesian(node.x, node.y))
+        ecsm.addEntityComponent(
             ent,
             Attack(
-                attackRange=attr.attack_range,
-                attackSpeed=attr.attack_speed,
-                dmg=attr.damage,
+                attackRange=attr['attack_range'],
+                attackSpeed=attr['attack_speed'],
+                dmg=attr['damage'],
                 target=None,
                 attackable=False,
             ),
         )
-        self.ecsm.addEntityComponent(ent, Faction(1))
-        self.state.staticTree.add(EntityPoint2D(node.x, node.y, entity=ent))
+        ecsm.addEntityComponent(ent, Faction(1))
+        state.staticTree.add(EntityPoint2D(node.x, node.y, entity=ent))
+        state.entities[ent.ID] = ent
 
-    def createMob(self, entityType, x, y):
-        ent = self.ecsm.createEntity()
+        return ent
 
-        attr = None
-        if entityType == GameEntityType.Orc:
-            attr = Game.processJson(self.R.mob.orc)
+    @staticmethod
+    def createMob(ecsm, state, entityType, x, y):
+        try:
+            ent = ecsm.createEntity()
+        except IndexError:
+            return None
 
-        self.ecsm.addEntityComponent(ent, LocationCartesian(x, y))
-        self.ecsm.addEntityComponent(
+        attrPath = None
+        if entityType == GameEntityType.ORC:
+            attrPath = R_PATHS.mob.orc
+        attr = processJson(attrPath)
+
+        ecsm.addEntityComponent(ent, LocationCartesian(x, y))
+        ecsm.addEntityComponent(
             ent,
             Attack(
-                attackRange=attr.attackRange,
-                attackSpeed=attr.attack_speed,
-                dmg=attr.damage,
+                attackRange=attr['attack_range'],
+                attackSpeed=attr['attack_speed'],
+                dmg=attr['damage'],
                 target=None,
                 attackable=True,
             ),
         )
-        self.ecsm.addEntityComponent(ent, Vital(attr.health, 0))
-        self.ecsm.addEntityComponent(ent, Faction(0))
-        self.state.dynamicTree.add(EntityPoint2D(x, y, entity=ent))
+        ecsm.addEntityComponent(ent, Vital(attr['health'], 0))
+        ecsm.addEntityComponent(ent, Faction(0))
+        state.dynamicTree.add(EntityPoint2D(x, y, entity=ent))
+        state.entities[ent.ID] = ent
+
+        return ent
 
     def addPlayer(self, health=100, default_coins=100):
         player_id = len(self.state.player)
