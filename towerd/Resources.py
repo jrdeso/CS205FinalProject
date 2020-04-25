@@ -54,7 +54,7 @@ class Resources:
             for filename in filenames:
                 reference, _ = os.path.splitext(filename)
                 category = os.path.basename(dirpath)
-                self._setInternal(filename, reference, category)
+                self._setInternal(os.path.join(category, filename), reference, category)
 
     def _setInternal(self, path, reference, category):
         categoryDict = getattr(self, category, None)
