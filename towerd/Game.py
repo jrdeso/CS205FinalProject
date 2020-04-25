@@ -23,7 +23,6 @@ from towerd.Resources import Resources
 R_PATHS = Resources(
     os.path.join(os.environ["DATA_DIR"], "resources.json"), mapFromDir=True
 )
-print(R_PATHS.mob.orc)
 MAX_ENTITIES = 128
 
 

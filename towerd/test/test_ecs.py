@@ -110,7 +110,6 @@ class TestECS(unittest.TestCase):
         self.state.waveInProgress = True
 
         self.assertEqual(self.ecsm.em.nActive, 5)
-        print(self.ecsm.em.nActive)
 
         for i in range(4, self.maxEntities):
             locComp = self.ecsm.getEntityComponent(self.state.entities[i], LocationCartesian)
