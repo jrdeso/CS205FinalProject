@@ -32,6 +32,18 @@ def processJson(filepath):
     return json.loads(jsonString)
 
 
+class GameEvent(enum.IntEnum):
+    START = enum.auto()
+    QUIT = enum.auto()
+
+
+class GameEntityType(enum.IntEnum):
+    ARCHER_TOWER = enum.auto()
+    MAGE_TOWER = enum.auto()
+    SOLDIER_TOWER = enum.auto()
+    ORC = enum.auto()
+
+
 class GameState:
     def __init__(self):
         self.player = None
@@ -44,13 +56,6 @@ class GameState:
 
         self.wave = 0
         self.waveInProgress = False
-
-
-class GameEntityType(enum.IntEnum):
-    ARCHER_TOWER = enum.auto()
-    MAGE_TOWER = enum.auto()
-    SOLDIER_TOWER = enum.auto()
-    ORC = enum.auto()
 
 
 class Game:
