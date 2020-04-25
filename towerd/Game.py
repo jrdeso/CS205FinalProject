@@ -54,7 +54,7 @@ class GameEntityType(enum.IntEnum):
 
 
 class Game:
-    def __init__(self, width, height, datadir):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
 
@@ -191,7 +191,7 @@ class Game:
         self.running = True
 
         # self.setupAssets()
-        mapJson = Game.processJson(mapPath)
+        mapJson = processJson(mapPath)
 
         self.setupGameState(mapJson)
         self.setupECS()

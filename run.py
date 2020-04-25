@@ -1,5 +1,6 @@
 import argparse
 import os
+os.environ['DATA_DIR'] = os.environ.get('DATA_DIR', 'data')
 
 from towerd.Game import Game
 
@@ -10,11 +11,9 @@ def init_parser():
                         help='Width of the window')
     parser.add_argument('--height', type=int, default=600,
                         help='Height of the window')
-    parser.add_argument('-d', '--datapath', type=str, default='data',
-                        help='The game data files.')
     return parser
 
 
 args = init_parser().parse_args()
-game = Game(width=args.width, height=args.height, datadir=args.datapath)
+game = Game(width=args.width, height=args.height)
 game.run('data/maps/default.json')
