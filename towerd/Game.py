@@ -49,7 +49,7 @@ class Game:
         self.width = width
         self.height = height
 
-        resourcePath = os.path.join(datadir, 'resources.json')
+        resourcePath = os.path.join(datadir, "resources.json")
         self.R = Resources(resourcePath, mapFromDir=True)
 
         self.running = False
@@ -69,60 +69,73 @@ class Game:
     def handleInput(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.run = False
+                self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.locals.K_q:
                     pos = pygame.mouse.get_pos()
-                    if pos:
-                        self.createEntity(pos[0], pos[1], GameEntityType.ArcherTower)
+                    self.createEntity(pos[0], pos[1], GameEntityType.ArcherTower)
                 if event.key == pygame.locals.K_w:
                     pos = pygame.mouse.get_pos()
-                    if pos:
-                        self.createEntity(pos[0], pos[1], GameEntityType.MageTower)
+                    self.createEntity(pos[0], pos[1], GameEntityType.MageTower)
                 if event.key == pygame.locals.K_e:
                     pos = pygame.mouse.get_pos()
-                    if pos:
-                        self.createEntity(pos[0], pos[1], GameEntityType.SoldierTower)
-                else:
-                    return False
+                    self.createEntity(pos[0], pos[1], GameEntityType.SoldierTower)
 
-    def createEntity(self, x, y, entityType):
-        """
-        Create entity at the location. Usually should only be used for towers
-        or debugging mobs.
-        """
-        def process_json(filepath):
-            with open(self.R.tower.archer_tower) as f:
-                jsonLines = f.readlines()
-                jsonArr = [line.strip for line in jsonLines]
-                jsonString = ''.join(jsonArr)
-            return jsonString
+    @staticmethod
+    def processJson(filepath):
+        with open(filepath) as f:
+            jsonLines = f.readlines()
+            jsonArr = [line.strip for line in jsonLines]
+            jsonString = "".join(jsonArr)
+        return json.loads(jsonString)
 
+    def createTower(self, entityType, nodeID):
+        ent = self.ecsm.createEntity()
+        node = self.map.nodes[nodeID]
+
+        attr = None
         if entityType == GameEntityType.ArcherTower:
-            obj = json.loads(process_json(self.R.tower.archer_tower))
-            tower_ent = self.ecsm.createEntity()
-            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
-            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.5, attackSpeed = 2, dmg = 7, target = None, attackable = False))
-            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
-        elif entityType == GameEntityType.Orc:
-            obj = json.loads(process_json(self.R.mob.orc))
-            ent = self.ecsm.createEntity()
-            self.ecsm.addEntityComponent(ent, LocationCartesian(x, y))
-            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 10, target = None, attackable = True))
-            self.ecsm.addEntityComponent(ent, Vital(100, 10))
-            self.ecsm.addEntityComponent(ent, Faction(faction=0))
+            attr = Game.processJson(self.R.tower.archer_tower)
         elif entityType == GameEntityType.MageTower:
-            obj = json.loads(process_json(self.R.tower.mage_tower))
-            tower_ent = self.ecsm.createEntity()
-            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
-            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.3, attackSpeed = 1, dmg = 10, target = None, attackable = False))
-            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
+            attr = Game.processJson(self.R.tower.mage_tower)
         elif entityType == GameEntityType.SoldierTower:
-            obj = json.loads(process_json(self.R.tower.soldier_tower))
-            tower_ent = self.ecsm.createEntity()
-            self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
-            self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 4, target = None, attackable = False))
-            self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
+            attr = Game.processJson(self.R.tower.soldier_tower)
+
+        self.ecsm.addEntityComponent(ent, LocationCartesian(node.x, node.y))
+        self.ecsm.addEntityComponent(
+            ent,
+            Attack(
+                attackRange=attr.attack_range,
+                attackSpeed=attr.attack_speed,
+                dmg=attr.damage,
+                target=None,
+                attackable=False,
+            ),
+        )
+        self.ecsm.addEntityComponent(ent, Faction(1))
+        self.state.staticTree.add(EntityPoint2D(node.x, node.y, entity=ent))
+
+    def createMob(self, entityType, x, y):
+        ent = self.ecsm.createEntity()
+
+        attr = None
+        if entityType == GameEntityType.Orc:
+            attr = Game.processJson(self.R.mob.orc)
+
+        self.ecsm.addEntityComponent(ent, LocationCartesian(x, y))
+        self.ecsm.addEntityComponent(
+            ent,
+            Attack(
+                attackRange=attr.attackRange,
+                attackSpeed=attr.attack_speed,
+                dmg=attr.damage,
+                target=None,
+                attackable=True,
+            ),
+        )
+        self.ecsm.addEntityComponent(ent, Vital(attr.health, 0))
+        self.ecsm.addEntityComponent(ent, Faction(0))
+        self.state.dynamicTree.add(EntityPoint2D(x, y, entity=ent))
 
     def addPlayer(self, health=100, default_coins=100):
         player_id = len(self.state.player)
@@ -156,8 +169,7 @@ class Game:
         self.running = True
 
         # self.setupAssets()
-        with open(mapPath) as f:
-            mapJson = json.loads("".join([line.strip() for line in f.readlines()]))
+        mapJson = Game.processJson(mapPath)
 
         self.setupGameState(mapJson)
         self.setupECS()
