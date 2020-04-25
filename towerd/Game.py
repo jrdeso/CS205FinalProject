@@ -141,7 +141,6 @@ class Game:
         self.state.static_tree = kdtree.create(dimensions=2)
 
     def setupECS(self):
-        self.ecsm = ECSManager(5)
         self.ecsm.registerComponent(Coin)
         self.ecsm.registerComponent(LocationCartesian)
         self.ecsm.registerComponent(LocationNode)
