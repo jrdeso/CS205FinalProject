@@ -5,21 +5,20 @@ import kdtree
 import os
 import pygame
 
-from ECS import ECSManager
-from Map import Map, PathType
-from component.Coin import Coin
-from component.LocationCartesian import LocationCartesian
-from component.LocationNode import LocationNode
-from component.Movement import Movement
-from component.Vital import Vital
-from component.Attack import Attack
-from component.Faction import Faction
-from system.MovementSystem import MovementSystem
-from system.AttackSystem import AttackSystem
-from util.EntityPoint2D import EntityPoint2D
+from towerd.ECS import ECSManager
+from towerd.Map import Map, PathType
+from towerd.component.Coin import Coin
+from towerd.component.LocationCartesian import LocationCartesian
+from towerd.component.LocationNode import LocationNode
+from towerd.component.Movement import Movement
+from towerd.component.Vital import Vital
+from towerd.component.Attack import Attack
+from towerd.component.Faction import Faction
+from towerd.system.MovementSystem import MovementSystem
+from towerd.system.AttackSystem import AttackSystem
+from towerd.util.EntityPoint2D import EntityPoint2D
 
-from Resources import Resources
-_R = Resources('../data/resources.json', gatherFromDir=True)
+from towerd.Resources import Resources
 
 MAX_ENTITIES = 128
 
