@@ -6,17 +6,28 @@ from towerd.component.LocationCartesian import LocationCartesian
 
 
 class MovementSystem(System):
-    def update(self, dt, state, ecs_manager):
-        for entity in self.entities:
-            movementComps = ecs_manager.getComponentArr(Movement)
-            locComps = ecs_manager.getComponentArr(LocationCartesian)
+    def update(self, dt, state, ecsManager):
+        """
+        Move entities with movement and location components.
 
+        :param dt: change in time
+        :param state: the game state
+        :param ecsManager: ECS Manager
+        """
+        for entity in self.entities:
+            movementComps = ecsManager.getComponentArr(Movement)
+            locComps = ecsManager.getComponentArr(LocationCartesian)
+
+            # grab movement related details from the current entity
             movementComp = movementComps[entity.ID]
             speed = movementComp.speed
             fromNode = movementComp.fromNode
             destNode = movementComp.destNode
 
             m = state['map']
+
+            # get the current location and target destination
+            # TODO: Check that entity has a target destination
             fromNode = m.nodes[fromNode]
             destNode = m.nodes[destNode]
             locComp = locComps[entity.ID]
@@ -24,6 +35,7 @@ class MovementSystem(System):
             fromX, fromY = locComp.x, locComp.y
             destX, destY = destNode.x, destNode.y
 
+            # calculate the new coordinates
             totalDiffX = destX - fromX
             totalDiffY = destY - fromY
 

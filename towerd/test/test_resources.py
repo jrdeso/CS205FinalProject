@@ -23,8 +23,8 @@ class TestResources(unittest.TestCase):
         _, cls.tmp_tmp2 = tempfile.mkstemp(suffix="_file", dir=cls.tmp_subdir2.name)
         _, cls.tmp_tmp3 = tempfile.mkstemp(suffix="_file", dir=cls.tmp_subdir3.name)
 
-    def test_resources(self):
-        resources = Resources(TestResources.tmp_resource)
+    def test_resources_filemap(self):
+        resources = Resources(TestResources.tmp_resource, mapFromFile=True)
 
         self.assertEqual(
             resources.sound.arrow1,
@@ -35,8 +35,8 @@ class TestResources(unittest.TestCase):
             os.path.join(resources.pathDir, "assets/image/tower1.png"),
         )
 
-    def test_gather(self):
-        resources = Resources(TestResources.tmp_resource, gatherFromDir=True)
+    def test_name_map(self):
+        resources = Resources(TestResources.tmp_resource, nameMap=True)
 
         tmp_files = [
             TestResources.tmp_tmp1,
