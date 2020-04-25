@@ -1,9 +1,9 @@
-import dataclasses
 import enum
 import json
 import kdtree
 import os
 import pygame
+import pygame.locals
 
 from towerd.ECS import ECSManager
 from towerd.Map import Map, PathType
@@ -45,11 +45,14 @@ class GameEntityType(enum.IntEnum):
 
 
 class Game:
-    def __init__(self):
-        self.width = 1200
-        self.height = 700
+    def __init__(self, width, height, datadir):
+        self.width = width
+        self.height = height
 
-        self.run = False
+        resourcePath = os.path.join(datadir, 'resources.json')
+        self.R = Resources(resourcePath, mapFromDir=True)
+
+        self.running = False
         self.ecsm = ECSManager(MAX_ENTITIES)
         self.state = None
 
@@ -57,26 +60,26 @@ class Game:
 
     def createWindow(self):
         self.win = pygame.display.set_mode((self.width, self.height))
-        self.background = pygame.image.load(os.path.join("xxxxxxx", "xxxxx.png"))
-        self.background = pygame.transform.scale(self.background, (self.width, self.height))
+        # self.background = pygame.image.load(os.path.join("xxxxxxx", "xxxxx.png"))
+        # self.background = pygame.transform.scale(self.background, (self.width, self.height))
 
-        pygame.mixer.music.load("xxx.mp3")
-        pygame.mixer.music.play(loops=-1)
+        # pygame.mixer.music.load("xxx.mp3")
+        # pygame.mixer.music.play(loops=-1)
 
     def handleInput(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.run = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_Q:
+                if event.key == pygame.locals.K_q:
                     pos = pygame.mouse.get_pos()
                     if pos:
                         self.createEntity(pos[0], pos[1], GameEntityType.ArcherTower)
-                if event.key == pygame.K_W:
+                if event.key == pygame.locals.K_w:
                     pos = pygame.mouse.get_pos()
                     if pos:
                         self.createEntity(pos[0], pos[1], GameEntityType.MageTower)
-                if event.key == pygame.K_E:
+                if event.key == pygame.locals.K_e:
                     pos = pygame.mouse.get_pos()
                     if pos:
                         self.createEntity(pos[0], pos[1], GameEntityType.SoldierTower)
@@ -89,33 +92,33 @@ class Game:
         or debugging mobs.
         """
         def process_json(filepath):
-            with open(_R.tower.archer_tower) as f:
+            with open(self.R.tower.archer_tower) as f:
                 jsonLines = f.readlines()
                 jsonArr = [line.strip for line in jsonLines]
                 jsonString = ''.join(jsonArr)
             return jsonString
 
         if entityType == GameEntityType.ArcherTower:
-            obj = json.loads(process_json(_R.tower.archer_tower))
+            obj = json.loads(process_json(self.R.tower.archer_tower))
             tower_ent = self.ecsm.createEntity()
             self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
             self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.5, attackSpeed = 2, dmg = 7, target = None, attackable = False))
             self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
         elif entityType == GameEntityType.Orc:
-            obj = json.loads(process_json(_R.mob.orc))
+            obj = json.loads(process_json(self.R.mob.orc))
             ent = self.ecsm.createEntity()
             self.ecsm.addEntityComponent(ent, LocationCartesian(x, y))
             self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 10, target = None, attackable = True))
             self.ecsm.addEntityComponent(ent, Vital(100, 10))
             self.ecsm.addEntityComponent(ent, Faction(faction=0))
         elif entityType == GameEntityType.MageTower:
-            obj = json.loads(process_json(_R.tower.mage_tower))
+            obj = json.loads(process_json(self.R.tower.mage_tower))
             tower_ent = self.ecsm.createEntity()
             self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
             self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.3, attackSpeed = 1, dmg = 10, target = None, attackable = False))
             self.ecsm.addEntityComponent(tower_ent, Faction(faction = 1))
         elif entityType == GameEntityType.SoldierTower:
-            obj = json.loads(process_json(_R.tower.soldier_tower))
+            obj = json.loads(process_json(self.R.tower.soldier_tower))
             tower_ent = self.ecsm.createEntity()
             self.ecsm.addEntityComponent(tower_ent, LocationCartesian(x, y))
             self.ecsm.addEntityComponent(tower_ent, Attack(attackRange = 0.01, attackSpeed = 1, dmg = 4, target = None, attackable = False))
@@ -151,10 +154,13 @@ class Game:
         self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
 
     def run(self, mapPath):
-        self.run = True
+        self.running = True
 
-        self.setupAssets()
-        self.setupGameState()
+        # self.setupAssets()
+        with open(mapPath) as f:
+            mapJson = json.loads("".join([line.strip() for line in f.readlines()]))
+
+        self.setupGameState(mapJson)
         self.setupECS()
 
         movementSystem = self.ecsm.getSystem(MovementSystem)
@@ -171,5 +177,5 @@ class Game:
             self.draw()
             dt = clock.tick(60)
 
-    def draw():
+    def draw(self):
         pass
