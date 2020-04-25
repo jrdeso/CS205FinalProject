@@ -13,12 +13,12 @@ class SpawnSystem(System):
     def update(self, dt, state, ecs_manager):
         # Get all path_start MapNodes and add them to a list
         pathStartNodes = []
-        for nodeID, mapNode in state['map'].nodes.items():
+        for nodeID, mapNode in state.map.nodes.items():
             if mapNode.pathType == PathType.PATH_START:
                 pathStartNodes.append(mapNode)
 
         # Get the number of mobs based on what wave it is
-        waveNum = state['wave']
+        waveNum = state.wave
         numMobs = 0
         if waveNum == 1:
             numMobs = 5
@@ -38,8 +38,8 @@ class SpawnSystem(System):
                 break
             # Get x and y coords from a random path_start
             pathStartNode = random.choice(pathStartNodes)
-            pathTargetID = random.choice(state['map'].map[pathStartNode.id])
-            pathTargetNode = state['map'].nodes[pathTargetID]
+            pathTargetID = random.choice(state.map.map[pathStartNode.id])
+            pathTargetNode = state.map.nodes[pathTargetID]
 
             pathStartX = pathStartNode.x
             pathStartY = pathStartNode.y
@@ -54,4 +54,4 @@ class SpawnSystem(System):
             ecs_manager.addEntityComponent(mob, Attack(0.01, 2, 5, None, True))
             ecs_manager.addEntityComponent(mob, Faction(0))
 
-            state['entities'][mob.ID] = mob
+            state.entities[mob.ID] = mob

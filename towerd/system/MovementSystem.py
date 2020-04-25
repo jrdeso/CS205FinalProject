@@ -24,7 +24,7 @@ class MovementSystem(System):
             fromNode = movementComp.fromNode
             destNode = movementComp.destNode
 
-            m = state['map']
+            m = state.map
 
             # get the current location and target destination
             # TODO: Check that entity has a target destination
