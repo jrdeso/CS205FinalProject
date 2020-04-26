@@ -44,7 +44,7 @@ class MovementSystem(System):
 
             dx = dl * math.cos(theta)
             dy = dl * math.sin(theta)
-
+            '''
             if fromX < destX and (newX := fromX + dx) < destX:
                 locComp.x = newX
             elif fromX > destX and (newX := fromX - dx) > destX:
@@ -56,5 +56,28 @@ class MovementSystem(System):
                 locComp.y = newY
             elif fromY > destY and (newY := fromY - dy) > destY:
                 locComp.y = newY
+            else:
+                locComp.y = destY
+            '''
+
+            if fromX < destX:
+                newX = fromX + dx
+                if(newX < destX):
+                    locComp.x = newX
+            elif fromX > destX:
+                newX = fromX - dx
+                if(newX > destX):
+                    locComp.x = newX
+            else:
+                locComp.x = destX
+
+            if fromY < destY:
+                newY = fromY + dy
+                if(newY < destY):
+                    locComp.y = newY
+            elif fromY > destY:
+                newY = fromY - dy
+                if(newY > destY):
+                    locComp.y = newY
             else:
                 locComp.y = destY
