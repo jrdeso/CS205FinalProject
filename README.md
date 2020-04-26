@@ -24,6 +24,6 @@ Install requirements using
 
 Run tests from the terminal using
 
-`python -m unittest discover -- towerd.test`
+`ASSET_DIR=asset DATA_DIR=data python -m unittest discover -- towerd.test`
 
 from the project directory.
