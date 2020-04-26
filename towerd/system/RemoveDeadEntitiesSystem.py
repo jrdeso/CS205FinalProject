@@ -19,7 +19,7 @@ class RemoveDeadEntitiesSystem(System):
 
             if vitalComp.health <= 0:
                 # The entity is dead, remove it from self.entites
-                self.entities.remove(entity)
+                del state.entities[entity.ID]
 
                 # Remove the entity from ecs mananger
                 ecsManager.removeEntity(entity)

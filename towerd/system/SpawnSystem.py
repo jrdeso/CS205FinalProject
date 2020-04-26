@@ -1,9 +1,8 @@
 import random
 
-from towerd.Map import PathType
 from towerd.System import System
 from towerd.component.LocationCartesian import LocationCartesian
-from towerd.component.MapNode import MapNode
+from towerd.component.MapNode import MapNode, PathType
 from towerd.component.Movement import Movement
 
 

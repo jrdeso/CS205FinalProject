@@ -24,9 +24,10 @@ class AttackSystem(System):
 
             # If the attacker doesn't already have a target, set the target to
             # be the nearest, in-range entity of the opposite faction
-            if not entityAttackComp.target:
+            if (not entityAttackComp.target
+                    or entityAttackComp.target and entityAttackComp.target.ID not in state.entities):
                 ep2ds = state.dynamicTree.search_nn_dist(
-                    (entityLocComp.x, entityLocComp.y), entityAttackComp.attackRange
+                    (entityLocComp.x, entityLocComp.y), entityAttackComp.attackRange ** 2
                 )
                 ep2ds = sorted(
                     ep2ds, key=lambda t: calcDist(entityLocComp.x, entityLocComp.y, *t)
@@ -54,7 +55,7 @@ class AttackSystem(System):
                 continue
 
             targetVitalComp = vitalComps[entityAttackComp.target.ID]
-            totalDamage = entityAttackComp.attackSpeed * dt * entityAttackComp.dmg
+            totalDamage = entityAttackComp.attackSpeed * dt/1000 * entityAttackComp.dmg
 
             # Do the damage to nearest entity
             if targetVitalComp.shield > 0:
@@ -65,5 +66,5 @@ class AttackSystem(System):
                     targetVitalComp.health -= excessDamage
             else:
                 targetVitalComp.health -= totalDamage
-
-            print(target, targetVitalComp)
+                if targetVitalComp.health <= 0:
+                    entityAttackComp.target = None

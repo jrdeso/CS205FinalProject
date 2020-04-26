@@ -6,7 +6,6 @@ import pygame
 import pygame.locals
 
 from towerd.ECS import ECSManager
-# from towerd.Map import Map, PathType
 from towerd.component.Coin import Coin
 from towerd.component.LocationCartesian import LocationCartesian
 from towerd.component.MapNode import MapNode, PathType
@@ -47,6 +46,7 @@ class GameEvent(enum.IntEnum):
     START = enum.auto()
     QUIT = enum.auto()
     NEXT_WAVE = enum.auto()
+    CREATE_TOWER = enum.auto()
 
 
 class GameEntityType(enum.IntEnum):
@@ -70,6 +70,7 @@ class GameState:
 
         self.wave = 0
         self.waveInProgress = False
+        self.gameover = False
 
 
 class Game:
@@ -78,6 +79,7 @@ class Game:
         self.height = height
 
         self.running = True
+        self.playing = False
         self.ecsm = ECSManager(MAX_ENTITIES)
         self.state = None
 
@@ -88,7 +90,7 @@ class Game:
         self.changeInterface(UIType.MAIN_MENU)
 
     def changeInterface(self, uiType):
-        self.curInterface = UIFactory.createUI(UIType.MAIN_MENU, self.win.get_size())
+        self.curInterface = UIFactory.createUI(uiType, self.win.get_size())
 
         if self.curInterface.music:
             pygame.mixer.music.load(self.curInterface.music)
@@ -98,43 +100,36 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            if event.type == pygame.KEYDOWN:
-                # TODO: Get the node id mapped to with a clickable region.
-                # Change None to node id.
-                if event.key == pygame.locals.K_q:
-                    pos = pygame.mouse.get_pos()
-                    Game.createTower(
-                        self.ecsm, self.state, GameEntityType.ARCHER_TOWER, None
-                    )
-                if event.key == pygame.locals.K_w:
-                    pos = pygame.mouse.get_pos()
-                    Game.createTower(
-                        self.ecsm, self.state, GameEntityType.MAGE_TOWER, None
-                    )
-                if event.key == pygame.locals.K_e:
-                    pos = pygame.mouse.get_pos()
-                    Game.createTower(
-                        self.ecsm, self.state, GameEntityType.SOLDIER_TOWER, None
-                    )
 
     @staticmethod
-    def createTower(ecsm, state, entityType, nodeID):
+    def createTower(ecsm, state, entityType, x, y):
         try:
             ent = ecsm.createEntity()
         except IndexError:
             return None
-        node = state.map.nodes[nodeID]
 
         attrPath = None
         if entityType == GameEntityType.ARCHER_TOWER:
-            attrPath = R_PATHS.tower.archer_tower
+            attrPath = R_PATHS.tower.archer
         elif entityType == GameEntityType.MAGE_TOWER:
-            attrPath = R_PATHS.tower.mage_tower
+            attrPath = R_PATHS.tower.mage
         elif entityType == GameEntityType.SOLDIER_TOWER:
-            attrPath = R_PATHS.tower.soldier_tower
+            attrPath = R_PATHS.tower.soldier
         attr = processJson(attrPath)
 
-        ecsm.addEntityComponent(ent, LocationCartesian(node.x, node.y))
+        node, _ = state.mapTree.search_nn((x, y))
+        ep2d = node.data
+
+        def calcDist(x0, y0, x1, y1):
+            import math
+            return math.sqrt(math.pow(x1 - x0, 2) + math.pow(y1 - y0, 2))
+
+        dist = calcDist(*ep2d.coords, x, y)
+        print(dist, *ep2d.coords, x, y)
+        if dist > 5:
+            return None
+
+        ecsm.addEntityComponent(ent, LocationCartesian(*ep2d.coords))
         ecsm.addEntityComponent(
             ent,
             Attack(
@@ -147,8 +142,10 @@ class Game:
         )
         ecsm.addEntityComponent(ent, Faction(1))
         ecsm.addEntityComponent(ent, Sprite(A_PATHS.tower.archer))
-        state.staticTree.add(EntityPoint2D(node.x, node.y, entity=ent))
+        state.staticTree.add(EntityPoint2D(*ep2d.coords, entity=ent))
         state.entities[ent.ID] = ent
+
+        print('created', ent)
 
         return ent
 
@@ -198,8 +195,8 @@ class Game:
             elif pathType == pathType.PATH_END:
                 self.ecsm.addEntityComponent(ent, Sprite(A_PATHS.path.end))
             elif pathType == pathType.TOWER:
-                self.ecsm.addEntityComponent(ent, Sprite(A_PATHS.tower.archer))
-            self.state.mapTree.add(EntityPoint2D(*coords, entity=ent))
+                self.ecsm.addEntityComponent(ent, Sprite(A_PATHS.tower.tower))
+                self.state.mapTree.add(EntityPoint2D(*coords, entity=ent))
             self.state.mapEntities[ent.ID] = ent
 
     def addPlayer(self, health=100, default_coins=100):
@@ -213,7 +210,6 @@ class Game:
 
     def setupGameState(self):
         self.state = GameState()
-        # self.state.map = Map(map_json=jsonMap)
         self.state.dynamic_tree = kdtree.create(dimensions=2)
         self.state.static_tree = kdtree.create(dimensions=2)
 
@@ -234,77 +230,71 @@ class Game:
         self.ecsm.registerSystem(PlayerDamage, Faction, LocationCartesian, Attack, Vital)
         self.ecsm.registerSystem(RemoveDeadEntitiesSystem, Vital)
 
-    def handleGameEvent(self, state, *args):
+    def handleGameEvent(self, state, args):
         if state == GameEvent.START:
             self.changeInterface(UIType.IN_GAME)
-            self.run(*args)
+
+            self.setupGameState()
+            self.setupECS()
+            self.addPlayer()
+
+            mapJson = processJson(args)
+            self.buildMap(mapJson)
+            self.playing = True
+        elif state == GameEvent.CREATE_TOWER:
+            Game.createTower(self.ecsm, self.state, *args)
+        elif state == GameEvent.NEXT_WAVE:
+            self.state.wave += 1
+            self.state.waveInProgress = False
         elif state == GameEvent.QUIT:
-            self.running = False
+            self.playing = False
+            self.changeInterface(UIType.MAIN_MENU)
 
     def start(self):
         """
         Handles the display of any menus or overlays.
         """
+
         clock = pygame.time.Clock()
         dt = 0
         while self.running:
-            dt = clock.tick(60)/1000.0
-            for event in pygame.event.get():
-                state, args = None, None
-                if event.type == pygame.USEREVENT:
-                    state, args = self.curInterface.handleEvent(event)
-
-                if state:
-                    self.handleGameEvent(state, args)
-
-            self.curInterface.processEvents(event)
-            self.curInterface.update(dt)
-
-            self.curInterface.draw(self.win, state)
-
-            pygame.display.update()
-
-    def run(self, mapPath):
-        self.running = True
-
-        self.setupGameState()
-        self.setupECS()
-        self.addPlayer()
-
-        # self.setupAssets()
-        mapJson = processJson(mapPath)
-        self.buildMap(mapJson)
-
-        movementSystem = self.ecsm.getSystem(MovementSystem)
-        attackSystem = self.ecsm.getSystem(AttackSystem)
-        spawnSystem = self.ecsm.getSystem(SpawnSystem)
-        spriteSystem = self.ecsm.getSystem(SpriteSystem)
-        playerDamageSystem = self.ecsm.getSystem(PlayerDamage)
-        removeDeadEntitiesSystem = self.ecsm.getSystem(RemoveDeadEntitiesSystem)
-
-        dt = 0
-        clock = pygame.time.Clock()
-        while self.running:
-            self.win.fill(pygame.Color((100, 100, 100)))
             dt = clock.tick(60)
-            self.handleInput()
+            stateArgsBuffer = []
+            for event in pygame.event.get():
+                stateArgsBuffer.append(self.curInterface.handleEvent(event))
+                self.curInterface.processEvents(event)
 
-            if not self.state.waveInProgress:
-                spawnSystem.addWave(self.state.wave)
-                self.state.waveInProgress = True
+            for state, args in stateArgsBuffer:
+                self.handleGameEvent(state, args)
 
-            spawnSystem.update(dt, self.state, self.ecsm)
-            movementSystem.update(dt, self.state, self.ecsm)
-            attackSystem.update(dt, self.state, self.ecsm)
-            spriteSystem.update(dt, self.state, self.ecsm)
-            playerDamageSystem.update(dt, self.state, self.ecsm)
-            removeDeadEntitiesSystem.update(dt, self.state, self.ecsm)
+            self.curInterface.update(dt)
+            screen = self.curInterface.draw(self.state)
 
-            self.curInterface.draw(self.win, self.state)
-            spriteSystem.drawSprites(self.win)
+            if self.playing:
+                movementSystem = self.ecsm.getSystem(MovementSystem)
+                attackSystem = self.ecsm.getSystem(AttackSystem)
+                spawnSystem = self.ecsm.getSystem(SpawnSystem)
+                spriteSystem = self.ecsm.getSystem(SpriteSystem)
+                playerDamageSystem = self.ecsm.getSystem(PlayerDamage)
+                removeDeadEntitiesSystem = self.ecsm.getSystem(RemoveDeadEntitiesSystem)
+
+                if not self.state.waveInProgress:
+                    spawnSystem.addWave(self.state.wave)
+                    self.state.waveInProgress = True
+
+                spawnSystem.update(dt, self.state, self.ecsm)
+                movementSystem.update(dt, self.state, self.ecsm)
+                attackSystem.update(dt, self.state, self.ecsm)
+                spriteSystem.update(dt, self.state, self.ecsm)
+                playerDamageSystem.update(dt, self.state, self.ecsm)
+                removeDeadEntitiesSystem.update(dt, self.state, self.ecsm)
+                spriteSystem.drawSprites(screen)
+
+                playerVital = self.ecsm.getEntityComponent(self.state.player, Vital)
+                if playerVital.health <= 0:
+                    self.playing = False
+                    self.state.gameover = True
+
+            self.win.blit(screen, (0, 0))
 
             pygame.display.update()
-
-            playerVital = self.ecsm.getEntityComponent(self.state.player, Vital)
-            if playerVital.health <= 0:
-                return

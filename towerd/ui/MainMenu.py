@@ -4,35 +4,41 @@ import pygame_gui
 from towerd.ui.UI import UI
 
 
-class MainMenu(UI):
-    def __init__(self, resolution):
-        super().__init__(resolution)
-        background = pygame.Surface(resolution)
-        background.fill(pygame.Color((100, 100, 100)))
+class MainMenu(pygame.Surface, UI):
+    def __init__(self, *args, **kwargs):
+        pygame.Surface.__init__(self, *args, **kwargs)
+        UI.__init__(self, self.get_size())
 
-        font = pygame.font.Font("freesansbold.ttf", 72)
-        welcomeMessage = font.render(
-            "Tower Defense", True, (252, 252, 252)
-        )
+        self.font = pygame.font.Font("freesansbold.ttf", 72)
+        self.bgColor = pygame.Color((100, 100, 100))
+        self.fgColor = pygame.Color((255, 255, 255))
 
-        # make button to start game - quit
+        width, height = self.get_size()
         self.startButton = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((350, 0), (100, 50)),
+            relative_rect=pygame.Rect((0, 0), (100, 50)),
             text="Start",
             manager=self.manager,
         )
-
-        # Button to quit game
         self.quitButton = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((700, 0), (100, 50)),
+            relative_rect=pygame.Rect((width - 100, 0), (100, 50)),
             text="Quit",
             manager=self.manager,
         )
 
-        self.blits = [
-            (background, (0, 0)),
-            (welcomeMessage, (int(resolution[0] / 5), int(resolution[1] / 4))),
+        welcomeMessage = self.font.render(
+            "Tower Defense", True, self.fgColor
+        )
+
+        self.windowItems = [
+            (welcomeMessage, (int(width / 6), int(height / 2))),
         ]
+
+    def draw(self, state):
+        self.fill(self.bgColor)
+        for item, args in self.windowItems:
+            self.blit(item, args)
+        self.manager.draw_ui(self)
+        return self
 
     def handleEvent(self, event):
         from towerd.Game import GameEvent, R_PATHS
@@ -42,4 +48,4 @@ class MainMenu(UI):
                     return (GameEvent.START, R_PATHS.map.default)
                 if event.ui_element == self.quitButton:
                     exit(0)
-            return None, None
+        return None, None

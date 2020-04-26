@@ -10,6 +10,9 @@ class SpriteSystem(System):
         super().__init__()
         self.entitySprite = {}
 
+    def removeEntity(self, entity):
+        del self.entitySprite[entity.ID]
+
     def update(self, dt, state, ecs_manager):
         locComps = ecs_manager.getComponentArr(LocationCartesian)
         spriteComps = ecs_manager.getComponentArr(Sprite)

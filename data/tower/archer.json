@@ -1,6 +1,6 @@
 {
     "type": "archer",
-    "damage": 3,
+    "damage": 20,
     "attack_speed": 1,
-    "attack_range": 0.1
+    "attack_range": 20
 }

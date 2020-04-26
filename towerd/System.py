@@ -11,6 +11,9 @@ class System(abc.ABC):
     def __init__(self):
         self.entities = set()
 
+    def removeEntity(self, entity):
+        pass
+
     @abc.abstractmethod
     def update(self, dt, state, ecs_manager):
         """
@@ -64,6 +67,7 @@ class SystemManager:
         :param entity: the entity to remove
         """
         self.systems[T.__name__].entities.discard(entity)
+        self.systems[T.__name__].removeEntity(entity)
 
     def removeEntityAll(self, entity):
         """
@@ -74,6 +78,7 @@ class SystemManager:
         """
         for system in self.systems.values():
             system.entities.discard(entity)
+            system.removeEntity(entity)
 
     def updateEntity(self, entity, entityBitset):
         """

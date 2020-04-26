@@ -6,7 +6,6 @@ from towerd.component.Movement import Movement
 from towerd.component.MapNode import MapNode
 from towerd.component.LocationCartesian import LocationCartesian
 from towerd.util.EntityPoint2D import EntityPoint2D
-from towerd.Map import PathType
 
 
 class MovementSystem(System):

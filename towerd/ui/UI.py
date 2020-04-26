@@ -6,7 +6,7 @@ class UI(abc.ABC):
     def __init__(self, resolution):
         self.manager = pygame_gui.UIManager(resolution)
 
-        self.blits = []
+        self.windowItems = []
         self.music = None
 
         self.processEvents = self.manager.process_events
@@ -23,7 +23,5 @@ class UI(abc.ABC):
         """
         raise NotImplementedError
 
-    def draw(self, screen, state):
-        for blit, args in self.blits:
-            screen.blit(blit, *args)
-        self.drawUI = self.manager.draw_ui(screen)
+    def draw(self, state):
+        raise NotImplementedError
