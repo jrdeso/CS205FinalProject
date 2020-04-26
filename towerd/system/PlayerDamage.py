@@ -38,6 +38,7 @@ class PlayerDamage(System):
                 for mapEnt in pathEndMapEntity:
                     endNodeLoc = locComps[mapEnt.ID]
                     if entityLocComp.x == endNodeLoc.x and entityLocComp.y == endNodeLoc.y:
+                        print('damage')
                         # Calculate total damage based on mob's attack and attack speed
                         totalDamage = entityAttackComp.attackSpeed * entityAttackComp.dmg
 

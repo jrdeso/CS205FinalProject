@@ -43,7 +43,7 @@ class ECSManager:
     def removeEntity(self, entity):
         self.cm.removeEntityAll(entity)
         self.sm.removeEntityAll(entity)
-        self.em.removeEntity(entity)
+        self.em.remove(entity)
 
     def registerSystem(self, S, *Cs):
         systemBits = 0

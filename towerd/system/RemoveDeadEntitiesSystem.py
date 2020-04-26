@@ -1,13 +1,30 @@
 from towerd.System import System
 from towerd.component.Vital import Vital
+from towerd.component.LocationCartesian import LocationCartesian
+from towerd.util.EntityPoint2D import EntityPoint2D
 
-class RemoveDeadEntitiesDamage(System):
+
+class RemoveDeadEntitiesSystem(System):
     def update(self, dt, state, ecsManager):
-        for entity in self.entities:
-            vitalComps = ecsManager.getComponentArr(Vital)
-            if(vitalComps.health <= 0):
+        entities = set(self.entities)
+        locComps = ecsManager.getComponentArr(LocationCartesian)
+        vitalComps = ecsManager.getComponentArr(Vital)
+
+        for entity in entities:
+            try:
+                locComp = locComps[entity.ID]
+                vitalComp = vitalComps[entity.ID]
+            except KeyError:
+                continue
+            print('removing', entity, vitalComp)
+
+            if vitalComp.health <= 0:
+                print('removed', entity, vitalComp)
                 # The entity is dead, remove it from self.entites
                 self.entities.remove(entity)
 
                 # Remove the entity from ecs mananger
                 ecsManager.removeEntity(entity)
+
+                ep2d = EntityPoint2D(locComp.x, locComp.y, entity)
+                state.dynamicTree = state.dynamicTree.remove(ep2d)

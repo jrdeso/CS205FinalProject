@@ -52,7 +52,6 @@ class MovementSystem(System):
 
             theta = math.atan2(totalDiffY, totalDiffX)
             dl = speed * dt
-            print(dl)
 
             dx = dl * math.cos(theta)
             dy = dl * math.sin(theta)

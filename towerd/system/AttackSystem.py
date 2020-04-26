@@ -65,3 +65,5 @@ class AttackSystem(System):
                     targetVitalComp.health -= excessDamage
             else:
                 targetVitalComp.health -= totalDamage
+
+            print(target, targetVitalComp)

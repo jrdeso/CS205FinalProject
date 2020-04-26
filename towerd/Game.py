@@ -20,6 +20,7 @@ from towerd.system.AttackSystem import AttackSystem
 from towerd.system.SpriteSystem import SpriteSystem
 from towerd.system.SpawnSystem import SpawnSystem
 from towerd.system.PlayerDamage import PlayerDamage
+from towerd.system.RemoveDeadEntitiesSystem import RemoveDeadEntitiesSystem
 
 from towerd.ui.UIFactory import UIFactory, UIType
 
@@ -231,6 +232,7 @@ class Game:
         self.ecsm.registerSystem(SpriteSystem, LocationCartesian, Sprite)
         self.ecsm.registerSystem(SpawnSystem, MapNode, LocationCartesian)
         self.ecsm.registerSystem(PlayerDamage, Faction, LocationCartesian, Attack, Vital)
+        self.ecsm.registerSystem(RemoveDeadEntitiesSystem, Vital)
 
     def handleGameEvent(self, state, *args):
         if state == GameEvent.START:
@@ -278,6 +280,7 @@ class Game:
         spawnSystem = self.ecsm.getSystem(SpawnSystem)
         spriteSystem = self.ecsm.getSystem(SpriteSystem)
         playerDamageSystem = self.ecsm.getSystem(PlayerDamage)
+        removeDeadEntitiesSystem = self.ecsm.getSystem(RemoveDeadEntitiesSystem)
 
         dt = 0
         clock = pygame.time.Clock()
@@ -294,8 +297,13 @@ class Game:
             attackSystem.update(dt, self.state, self.ecsm)
             spriteSystem.update(dt, self.state, self.ecsm)
             playerDamageSystem.update(dt, self.state, self.ecsm)
+            removeDeadEntitiesSystem.update(dt, self.state, self.ecsm)
 
             self.curInterface.draw(self.win, self.state)
             spriteSystem.drawSprites(self.win)
 
             pygame.display.update()
+
+            playerVital = self.ecsm.getEntityComponent(self.state.player, Vital)
+            if playerVital.health <= 0:
+                return
