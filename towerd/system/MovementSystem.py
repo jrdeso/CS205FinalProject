@@ -1,8 +1,10 @@
 import math
+import random
 
 from towerd.System import System
 from towerd.component.Movement import Movement
 from towerd.component.LocationCartesian import LocationCartesian
+from towerd.Map import PathType
 
 
 class MovementSystem(System):
@@ -44,7 +46,7 @@ class MovementSystem(System):
 
             dx = dl * math.cos(theta)
             dy = dl * math.sin(theta)
-            '''
+
             if fromX < destX and (newX := fromX + dx) < destX:
                 locComp.x = newX
             elif fromX > destX and (newX := fromX - dx) > destX:
@@ -58,26 +60,15 @@ class MovementSystem(System):
                 locComp.y = newY
             else:
                 locComp.y = destY
-            '''
 
-            if fromX < destX:
-                newX = fromX + dx
-                if(newX < destX):
-                    locComp.x = newX
-            elif fromX > destX:
-                newX = fromX - dx
-                if(newX > destX):
-                    locComp.x = newX
-            else:
-                locComp.x = destX
 
-            if fromY < destY:
-                newY = fromY + dy
-                if(newY < destY):
-                    locComp.y = newY
-            elif fromY > destY:
-                newY = fromY - dy
-                if(newY > destY):
-                    locComp.y = newY
-            else:
-                locComp.y = destY
+            # Get possible destination nodes
+            pathEndNodes = []
+            for nodeID, mapNode in state.map.nodes.items():
+                if mapNode.pathType == PathType.PATH_END:
+                    pathEndNodes.append(mapNode)
+
+            # If the entity is at the destination node, update to next destination node
+            if(locComp.x == destNode.x and locComp.y == destNode.y):
+                newDestNode = random.choice(pathEndNodes)
+                locComp.destNode = newDestNode
