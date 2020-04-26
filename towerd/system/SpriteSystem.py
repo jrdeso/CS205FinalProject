@@ -9,7 +9,6 @@ class SpriteSystem(System):
     def __init__(self):
         super().__init__()
         self.entitySprite = {}
-        self.allSprites = []
 
     def update(self, dt, state, ecs_manager):
         locComps = ecs_manager.getComponentArr(LocationCartesian)
@@ -22,7 +21,6 @@ class SpriteSystem(System):
 
             if entity.ID not in self.entitySprite:
                 self.entitySprite[entity.ID] = EntitySprite(locComp.x, locComp.y, spriteComp.path)
-                self.allSprites.append(spriteComps)
 
             sprite = self.entitySpriteMapping[entity.ID]
             sprite.update(locComp.x, locComp.y)
@@ -32,10 +30,10 @@ class SpriteSystem(System):
         Method used to the groupings of sprites stored from update
         """
         width, height = screen.get_size()
-        for sprite in self.allSprites:
+        for _, sprite in self.entitySprite.items():
             win_x = sprite.x * width
             win_y = sprite.y * height
-            screen.blit(sprite.image, win_x, win_y)
+            screen.blit(sprite.image, (win_x, win_y))
 
 
 class EntitySprite(Sprite):
