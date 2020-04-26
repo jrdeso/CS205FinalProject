@@ -5,7 +5,14 @@
 ## Usage
 
 ```
-[Placeholder]
+usage: run.py [-h] [--width WIDTH] [--height HEIGHT]
+
+Tower Defence
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --width WIDTH    Width of the window
+  --height HEIGHT  Height of the window
 ```
 
 ## Development
