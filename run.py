@@ -16,4 +16,4 @@ def init_parser():
 
 args = init_parser().parse_args()
 game = Game(width=args.width, height=args.height)
-game.run('data/maps/default.json')
+game.start()

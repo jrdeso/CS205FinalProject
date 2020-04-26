@@ -16,6 +16,9 @@ from towerd.component.Attack import Attack
 from towerd.component.Faction import Faction
 from towerd.system.MovementSystem import MovementSystem
 from towerd.system.AttackSystem import AttackSystem
+
+from towerd.ui.UIFactory import UIFactory, UIType
+
 from towerd.util.EntityPoint2D import EntityPoint2D
 
 from towerd.Resources import Resources
@@ -32,6 +35,18 @@ def processJson(filepath):
     return json.loads(jsonString)
 
 
+class GameEvent(enum.IntEnum):
+    START = enum.auto()
+    QUIT = enum.auto()
+
+
+class GameEntityType(enum.IntEnum):
+    ARCHER_TOWER = enum.auto()
+    MAGE_TOWER = enum.auto()
+    SOLDIER_TOWER = enum.auto()
+    ORC = enum.auto()
+
+
 class GameState:
     def __init__(self):
         self.player = None
@@ -46,31 +61,27 @@ class GameState:
         self.waveInProgress = False
 
 
-class GameEntityType(enum.IntEnum):
-    ARCHER_TOWER = enum.auto()
-    MAGE_TOWER = enum.auto()
-    SOLDIER_TOWER = enum.auto()
-    ORC = enum.auto()
-
-
 class Game:
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
-        self.running = False
+        self.running = True
         self.ecsm = ECSManager(MAX_ENTITIES)
         self.state = None
 
-        self.createWindow()
-
-    def createWindow(self):
+        pygame.init()
         self.win = pygame.display.set_mode((self.width, self.height))
-        # self.background = pygame.image.load(os.path.join("xxxxxxx", "xxxxx.png"))
-        # self.background = pygame.transform.scale(self.background, (self.width, self.height))
+        self.curInterface = None
 
-        # pygame.mixer.music.load("xxx.mp3")
-        # pygame.mixer.music.play(loops=-1)
+        self.changeInterface(UIType.MAIN_MENU)
+
+    def changeInterface(self, uiType):
+        self.curInterface = UIFactory.createUI(UIType.MAIN_MENU, self.win.get_size())
+
+        if self.curInterface.music:
+            pygame.mixer.music.load(self.curInterface.music)
+            pygame.mixer.music.play(loops=-1)
 
     def handleInput(self):
         for event in pygame.event.get():
@@ -187,6 +198,38 @@ class Game:
         self.ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
         self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
 
+    def handleGameEvent(self, state, *args):
+        if state == GameEvent.START:
+            self.changeInterface(UIType.IN_GAME)
+            self.run(*args)
+        elif state == GameEvent.QUIT:
+            self.running = False
+
+    def start(self):
+        """
+        Handles the display of any menus or overlays.
+        """
+        clock = pygame.time.Clock()
+        dt = 0
+        while self.running:
+            dt = clock.tick(60)/1000.0
+            for event in pygame.event.get():
+                state, args = None, None
+                if event.type == pygame.USEREVENT:
+                    state, args = self.curInterface.handleEvent(event)
+
+                if state:
+                    self.handleGameEvent(state, args)
+
+            self.curInterface.processEvents(event)
+            self.curInterface.update(dt)
+
+            for item, args in self.curInterface.blits:
+                self.win.blit(item, args)
+            self.curInterface.drawUI(self.win)
+
+            pygame.display.update()
+
     def run(self, mapPath):
         self.running = True
 
@@ -201,7 +244,7 @@ class Game:
 
         dt = 0
         clock = pygame.time.Clock()
-        while self.run:
+        while self.running:
             self.handleInput()
 
             movementSystem.update(dt, self.state, self.ecsm)
