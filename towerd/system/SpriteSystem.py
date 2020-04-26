@@ -9,7 +9,7 @@ class SpriteSystem(System):
     def __init__(self):
         super().__init__()
         self.entitySprite = {}
-        self.allSprites = pygame.sprite.Group()
+        self.allSprites = []
 
     def update(self, dt, state, ecs_manager):
         locComps = ecs_manager.getComponentArr(LocationCartesian)
@@ -22,7 +22,7 @@ class SpriteSystem(System):
 
             if entity.ID not in self.entitySprite:
                 self.entitySprite[entity.ID] = EntitySprite(locComp.x, locComp.y, spriteComp.path)
-                self.allSprites.add(spriteComps)
+                self.allSprites.append(spriteComps)
 
             sprite = self.entitySpriteMapping[entity.ID]
             sprite.update(locComp.x, locComp.y)
@@ -31,10 +31,14 @@ class SpriteSystem(System):
         """
         Method used to the groupings of sprites stored from update
         """
-        self.allSprites.draw(screen)
+        width, height = screen.get_size()
+        for sprite in self.allSprites:
+            win_x = sprite.x * width
+            win_y = sprite.y * height
+            screen.blit(sprite.image, win_x, win_y)
 
 
-class EntitySprite(pygame.sprite.Sprite):
+class EntitySprite(Sprite):
     def __init__(self, x, y, spritePath):
         self.x = x
         self.y = y
@@ -49,7 +53,3 @@ class EntitySprite(pygame.sprite.Sprite):
     def update(self, x, y):
         self.x = x
         self.y = y
-
-        # TODO: x, y coords are scaled. Automatrically adjust to screen size.
-        self.rect.x = self.x
-        self.rect.y = self.y
