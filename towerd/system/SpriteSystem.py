@@ -22,7 +22,7 @@ class SpriteSystem(System):
             if entity.ID not in self.entitySprite:
                 self.entitySprite[entity.ID] = EntitySprite(locComp.x, locComp.y, spriteComp.path)
 
-            sprite = self.entitySpriteMapping[entity.ID]
+            sprite = self.entitySprite[entity.ID]
             sprite.update(locComp.x, locComp.y)
 
     def drawSprites(self, screen):
@@ -31,8 +31,8 @@ class SpriteSystem(System):
         """
         width, height = screen.get_size()
         for _, sprite in self.entitySprite.items():
-            win_x = sprite.x * width
-            win_y = sprite.y * height
+            win_x = sprite.x/100 * width
+            win_y = sprite.y/100 * height
             screen.blit(sprite.image, (win_x, win_y))
 
 

@@ -5,6 +5,7 @@ from towerd.System import System
 from towerd.component.Movement import Movement
 from towerd.component.MapNode import MapNode
 from towerd.component.LocationCartesian import LocationCartesian
+from towerd.util.EntityPoint2D import EntityPoint2D
 from towerd.Map import PathType
 
 
@@ -25,19 +26,25 @@ class MovementSystem(System):
             # grab movement related details from the current entity
             movementComp = movementComps[entity.ID]
             speed = movementComp.speed
+            fromEnt = movementComp.fromNode
             fromNode = mapNodes[movementComp.fromNode.ID]
 
-            if not movementComp.destNode:
+            if not movementComp.destNode and fromNode.edges:
                 destNodeEntity = random.choice(fromNode.edges)
                 movementComp.destNode = destNodeEntity
-            destNode = movementComp.destNode
+
+            destEnt = movementComp.destNode
+            destNode = mapNodes[destEnt.ID]
 
             # get the current location and target destination
             locComp = locComps[entity.ID]
-            pathLocComp = locComps[destNode.ID]
+            destLocComp = locComps[destEnt.ID]
 
             fromX, fromY = locComp.x, locComp.y
-            destX, destY = pathLocComp.x, pathLocComp.y
+            destX, destY = destLocComp.x, destLocComp.y
+
+            ep2d = EntityPoint2D(fromX, fromY, entity)
+            state.dynamicTree = state.dynamicTree.remove(ep2d)
 
             # calculate the new coordinates
             totalDiffX = destX - fromX
@@ -45,29 +52,30 @@ class MovementSystem(System):
 
             theta = math.atan2(totalDiffY, totalDiffX)
             dl = speed * dt
+            print(dl)
 
             dx = dl * math.cos(theta)
             dy = dl * math.sin(theta)
 
             if fromX < destX and (newX := fromX + dx) < destX:
-                locComp.x = newX
+                locComp.x = int(newX)
             elif fromX > destX and (newX := fromX - dx) > destX:
-                locComp.x = newX
+                locComp.x = int(newX)
             else:
-                locComp.x = destX
+                locComp.x = int(destX)
 
             if fromY < destY and (newY := fromY + dy) < destY:
-                locComp.y = newY
+                locComp.y = int(newY)
             elif fromY > destY and (newY := fromY - dy) > destY:
-                locComp.y = newY
+                locComp.y = int(newY)
             else:
-                locComp.y = destY
+                locComp.y = int(destY)
 
-
-            # Get list of neighboring nodes?
-            neighboringNodes = state.map.map[destNode.ID]
+            ep2d = EntityPoint2D(locComp.x, locComp.y, entity)
+            state.dynamicTree.add(ep2d)
 
             # If the entity is at the destination node, update to next destination node
-            if(locComp.x == destNode.x and locComp.y == destNode.y):
+            neighboringNodes = destNode.edges
+            if locComp.x == destX and locComp.y == destY and neighboringNodes:
                 newDestNode = random.choice(neighboringNodes)
-                locComp.destNode = newDestNode
+                movementComp.destNode = newDestNode

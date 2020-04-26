@@ -6,6 +6,9 @@ class EntityPoint2D:
     def __len__(self):
         return len(self.coords)
 
+    def __eq__(self, other):
+        return self.coords == other.coords and self.entity == other.entity
+
     def __getitem__(self, i):
         return self.coords[i]
 
@@ -13,4 +16,4 @@ class EntityPoint2D:
         return self.__str__()
 
     def __str__(self):
-        return f"[{self.coords[0]}, {self.coords[1]}] {self.entities}"
+        return f"[{self.coords[0]}, {self.coords[1]}] {self.entity}"

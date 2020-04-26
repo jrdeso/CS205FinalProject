@@ -37,6 +37,6 @@ class SpawnSystem(System):
             mobType = random.choice([GameEntityType.ORC])
             mob = Game.createMob(ecsManager, state, mobType, pathStartX, pathStartY)
             if mob:
-                ecsManager.addEntityComponent(
-                    mob, Movement(0.3, pathStartEntity, pathTargetEntity)
-                )
+                movement_comp = ecsManager.getEntityComponent(mob, Movement)
+                movement_comp.fromNode = pathStartEntity
+                movement_comp.destNode = pathTargetEntity

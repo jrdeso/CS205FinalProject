@@ -1,5 +1,5 @@
 from towerd.System import System
-from towerd.Map import PathType
+from towerd.component.MapNode import MapNode, PathType
 from towerd.component.Attack import Attack
 from towerd.component.Faction import Faction
 from towerd.component.LocationCartesian import LocationCartesian
@@ -12,15 +12,17 @@ class PlayerDamage(System):
         locComps = ecsManager.getComponentArr(LocationCartesian)
         attackComps = ecsManager.getComponentArr(Attack)
         vitalComps = ecsManager.getComponentArr(Vital)
+        mapNodes = ecsManager.getComponentArr(MapNode)
 
         # Get vital components of player
         playerVitalComp = vitalComps[state.player.ID]
 
         # Get all PATH_END nodes
-        pathEndNodes = []
-        for nodeID, mapNode in state.map.nodes.items():
+        pathEndMapEntity = []
+        for _, mapEntity in state.mapEntities.items():
+            mapNode = mapNodes[mapEntity.ID]
             if mapNode.pathType == PathType.PATH_END:
-                pathEndNodes.append(mapNode)
+                pathEndMapEntity.append(mapEntity)
 
         # Iterate through all entites
         for entity in self.entities:
@@ -33,8 +35,9 @@ class PlayerDamage(System):
             # If the entity is a mob
             if entityFactionComp.faction == 0:
                 # If the mob is at any PATH_END node
-                for endNode in pathEndNodes:
-                    if entityLocComp.x == endNode.x and entityLocComp.y == endNode.y:
+                for mapEnt in pathEndMapEntity:
+                    endNodeLoc = locComps[mapEnt.ID]
+                    if entityLocComp.x == endNodeLoc.x and entityLocComp.y == endNodeLoc.y:
                         # Calculate total damage based on mob's attack and attack speed
                         totalDamage = entityAttackComp.attackSpeed * entityAttackComp.dmg
 
