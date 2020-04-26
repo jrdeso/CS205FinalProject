@@ -1,6 +1,6 @@
 # Tower Defense
 
-[Description]
+A simple tower defense game.
 
 ## Usage
 
