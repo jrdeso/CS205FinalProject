@@ -22,3 +22,6 @@ class UI(abc.ABC):
         :return: tuple of (GameEvent, data)
         """
         raise NotImplementedError
+
+    def draw(self, screen, state):
+        self.drawUI = self.manager.draw_ui(screen)
