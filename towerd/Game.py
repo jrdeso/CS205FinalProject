@@ -6,16 +6,19 @@ import pygame
 import pygame.locals
 
 from towerd.ECS import ECSManager
-from towerd.Map import Map, PathType
+# from towerd.Map import Map, PathType
 from towerd.component.Coin import Coin
 from towerd.component.LocationCartesian import LocationCartesian
-from towerd.component.LocationNode import LocationNode
+from towerd.component.MapNode import MapNode, PathType
 from towerd.component.Movement import Movement
 from towerd.component.Vital import Vital
 from towerd.component.Attack import Attack
 from towerd.component.Faction import Faction
+from towerd.component.Sprite import Sprite
 from towerd.system.MovementSystem import MovementSystem
 from towerd.system.AttackSystem import AttackSystem
+from towerd.system.SpriteSystem import SpriteSystem
+from towerd.system.SpawnSystem import SpawnSystem
 
 from towerd.ui.UIFactory import UIFactory, UIType
 
@@ -23,10 +26,13 @@ from towerd.util.EntityPoint2D import EntityPoint2D
 
 from towerd.Resources import Resources
 
+A_PATHS = Resources(
+    os.path.join(os.environ["ASSET_DIR"], "resources.json"), mapFromDir=True
+)
 R_PATHS = Resources(
     os.path.join(os.environ["DATA_DIR"], "resources.json"), mapFromDir=True
 )
-MAX_ENTITIES = 128
+MAX_ENTITIES = 1024
 
 
 def processJson(filepath):
@@ -56,6 +62,7 @@ class GameState:
         self.entities = {}
         self.dynamicTree = kdtree.create(dimensions=2)
         self.staticTree = kdtree.create(dimensions=2)
+        self.mapTree = kdtree.create(dimensions=2)
 
         self.map = None
 
@@ -137,6 +144,7 @@ class Game:
             ),
         )
         ecsm.addEntityComponent(ent, Faction(1))
+        ecsm.addEntityComponent(ent, Sprite(A_PATHS.tower.archer))
         state.staticTree.add(EntityPoint2D(node.x, node.y, entity=ent))
         state.entities[ent.ID] = ent
 
@@ -167,10 +175,27 @@ class Game:
         )
         ecsm.addEntityComponent(ent, Vital(attr['health'], 0))
         ecsm.addEntityComponent(ent, Faction(0))
+        ecsm.addEntityComponent(ent, Sprite(A_PATHS.mob.orc))
         state.dynamicTree.add(EntityPoint2D(x, y, entity=ent))
         state.entities[ent.ID] = ent
 
         return ent
+
+    def buildMap(self, mapObj):
+        ents = [self.ecsm.createEntity() for i in range(len(mapObj))]
+
+        for ent, key in zip(ents, mapObj):
+            pathType, coords, edges = mapObj[key].values()
+            pathType = PathType.GetEnum(pathType)
+            edges = [ents[int(e)] for e in edges]
+            self.ecsm.addEntityComponent(ent, LocationCartesian(*coords))
+            self.ecsm.addEntityComponent(ent, MapNode(pathType, edges))
+            if pathType == PathType.PATH_START:
+                self.ecsm.addEntityComponent(ent, Sprite(A_PATHS.path.start))
+            elif pathType == pathType.PATH_END:
+                self.ecsm.addEntityComponent(ent, Sprite(A_PATHS.path.end))
+            self.state.mapTree.add(EntityPoint2D(*coords, entity=ent))
+            self.state.entities[ent.ID] = ent
 
     def addPlayer(self, health=100, default_coins=100):
         player_id = len(self.state.player)
@@ -183,23 +208,26 @@ class Game:
         self.state.player[player_id] = player
         self.state.playerVital = self.ecsm.getEntityComponent(player, Vital)
 
-    def setupGameState(self, jsonMap):
+    def setupGameState(self):
         self.state = GameState()
-        self.state.map = Map(map_json=jsonMap)
+        # self.state.map = Map(map_json=jsonMap)
         self.state.dynamic_tree = kdtree.create(dimensions=2)
         self.state.static_tree = kdtree.create(dimensions=2)
 
     def setupECS(self):
         self.ecsm.registerComponent(Coin)
         self.ecsm.registerComponent(LocationCartesian)
-        self.ecsm.registerComponent(LocationNode)
+        self.ecsm.registerComponent(MapNode)
         self.ecsm.registerComponent(Movement)
         self.ecsm.registerComponent(Vital)
         self.ecsm.registerComponent(Attack)
         self.ecsm.registerComponent(Faction)
+        self.ecsm.registerComponent(Sprite)
 
         self.ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
         self.ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
+        self.ecsm.registerSystem(SpriteSystem, LocationCartesian, Sprite)
+        self.ecsm.registerSystem(SpawnSystem, MapNode, LocationCartesian)
 
     def handleGameEvent(self, state, *args):
         if state == GameEvent.START:
@@ -234,22 +262,33 @@ class Game:
     def run(self, mapPath):
         self.running = True
 
+        self.setupGameState()
+        self.setupECS()
+
         # self.setupAssets()
         mapJson = processJson(mapPath)
-
-        self.setupGameState(mapJson)
-        self.setupECS()
+        self.buildMap(mapJson)
 
         movementSystem = self.ecsm.getSystem(MovementSystem)
         attackSystem = self.ecsm.getSystem(AttackSystem)
+        spawnSystem = self.ecsm.getSystem(SpawnSystem)
+        spriteSystem = self.ecsm.getSystem(SpriteSystem)
 
         dt = 0
         clock = pygame.time.Clock()
         while self.running:
+            dt = clock.tick(60)
             self.handleInput()
+
+            if not self.state.waveInProgress:
+                spawnSystem.update(dt, self.state, self.ecsm)
+                self.state.waveInProgress = True
 
             movementSystem.update(dt, self.state, self.ecsm)
             attackSystem.update(dt, self.state, self.ecsm)
+            spriteSystem.update(dt, self.state, self.ecsm)
 
             self.curInterface.draw(self.win, self.state)
-            dt = clock.tick(60)
+            spriteSystem.drawSprites(self.win)
+
+            pygame.display.update()

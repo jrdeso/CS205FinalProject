@@ -4,7 +4,7 @@ from ..Game import GameState
 from ..ECS import ECSManager
 from ..util.EntityPoint2D import EntityPoint2D
 from ..component.LocationCartesian import LocationCartesian
-from ..component.LocationNode import LocationNode
+from ..component.MapNode import MapNode, PathType
 from ..component.Movement import Movement
 from ..component.Vital import Vital
 from ..component.Attack import Attack
@@ -33,7 +33,7 @@ class TestECS(unittest.TestCase):
         self.maxEntities = 5
         ecsm = ECSManager(self.maxEntities)
         ecsm.registerComponent(LocationCartesian)
-        ecsm.registerComponent(LocationNode)
+        ecsm.registerComponent(MapNode)
         ecsm.registerComponent(Movement)
         ecsm.registerComponent(Vital)
         ecsm.registerComponent(Attack)
@@ -67,7 +67,7 @@ class TestECS(unittest.TestCase):
         # Make tower
         tower_node = self.n3
         tower_ent = ecsm.createEntity()
-        ecsm.addEntityComponent(tower_ent, LocationNode(tower_node.id))
+        # ecsm.addEntityComponent(tower_ent, LocationNode(tower_node.id))
         ecsm.addEntityComponent(tower_ent, LocationCartesian(tower_node.x, tower_node.y))
         ecsm.addEntityComponent(tower_ent, Attack(attackRange=0.5, attackSpeed=2, dmg=5, target=None, attackable=False))
         ecsm.addEntityComponent(tower_ent, Faction(faction=1))

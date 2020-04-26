@@ -1,44 +1,42 @@
 import random
 
-from towerd.Game import GameEntityType, Game
 from towerd.Map import PathType
 from towerd.System import System
+from towerd.component.LocationCartesian import LocationCartesian
+from towerd.component.MapNode import MapNode
 from towerd.component.Movement import Movement
 
 
 class SpawnSystem(System):
     def update(self, dt, state, ecsManager):
+        mapNodes = ecsManager.getComponentArr(MapNode)
+        locComps = ecsManager.getComponentArr(LocationCartesian)
+
         # Get all path_start MapNodes and add them to a list
         pathStartNodes = []
-        for nodeID, mapNode in state.map.nodes.items():
+        for entity in self.entities:
+            mapNode = mapNodes[entity.ID]
             if mapNode.pathType == PathType.PATH_START:
-                pathStartNodes.append(mapNode)
+                pathStartNodes.append(entity)
 
         # Get the number of mobs based on what wave it is
         waveNum = state.wave
-        numMobs = 0
-        if waveNum == 1:
-            numMobs = 5
-        elif waveNum == 2:
-            numMobs = 10
-        elif waveNum == 3:
-            numMobs = 15
-        elif waveNum == 4:
-            numMobs = 20
-        elif waveNum == 5:
-            numMobs = 25
+        numMobs = int(max(10, 10 * random.random() * waveNum))
 
+        from towerd.Game import GameEntityType, Game
         for i in range(numMobs):
-            pathStartNode = random.choice(pathStartNodes)
-            pathTargetID = random.choice(state.map.map[pathStartNode.id])
-            pathTargetNode = state.map.nodes[pathTargetID]
+            pathStartEntity = random.choice(pathStartNodes)
+            pathStartNode = mapNodes[pathStartEntity.ID]
 
-            pathStartX = pathStartNode.x
-            pathStartY = pathStartNode.y
+            pathTargetEntity = random.choice(pathStartNode.edges)
+
+            locComp = locComps[pathStartEntity.ID]
+            pathStartX = locComp.x
+            pathStartY = locComp.y
 
             mobType = random.choice([GameEntityType.ORC])
             mob = Game.createMob(ecsManager, state, mobType, pathStartX, pathStartY)
             if mob:
                 ecsManager.addEntityComponent(
-                    mob, Movement(0.3, pathStartNode.id, pathTargetNode.id)
+                    mob, Movement(0.3, pathStartEntity, pathTargetEntity)
                 )

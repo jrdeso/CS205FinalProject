@@ -3,6 +3,7 @@ import random
 
 from towerd.System import System
 from towerd.component.Movement import Movement
+from towerd.component.MapNode import MapNode
 from towerd.component.LocationCartesian import LocationCartesian
 from towerd.Map import PathType
 
@@ -18,24 +19,25 @@ class MovementSystem(System):
         """
         for entity in self.entities:
             movementComps = ecsManager.getComponentArr(Movement)
+            mapNodes = ecsManager.getComponentArr(MapNode)
             locComps = ecsManager.getComponentArr(LocationCartesian)
 
             # grab movement related details from the current entity
             movementComp = movementComps[entity.ID]
             speed = movementComp.speed
-            fromNode = movementComp.fromNode
+            fromNode = mapNodes[movementComp.fromNode.ID]
+
+            if not movementComp.destNode:
+                destNodeEntity = random.choice(fromNode.edges)
+                movementComp.destNode = destNodeEntity
             destNode = movementComp.destNode
 
-            m = state.map
-
             # get the current location and target destination
-            # TODO: Check that entity has a target destination
-            fromNode = m.nodes[fromNode]
-            destNode = m.nodes[destNode]
             locComp = locComps[entity.ID]
+            pathLocComp = locComps[destNode.ID]
 
             fromX, fromY = locComp.x, locComp.y
-            destX, destY = destNode.x, destNode.y
+            destX, destY = pathLocComp.x, pathLocComp.y
 
             # calculate the new coordinates
             totalDiffX = destX - fromX

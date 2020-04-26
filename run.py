@@ -1,6 +1,7 @@
 import argparse
 import os
 os.environ['DATA_DIR'] = os.environ.get('DATA_DIR', 'data')
+os.environ['ASSET_DIR'] = os.environ.get('ASSET_DIR', 'asset')
 
 from towerd.Game import Game
 
