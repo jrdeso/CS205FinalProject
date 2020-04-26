@@ -9,9 +9,11 @@ from ..component.Movement import Movement
 from ..component.Vital import Vital
 from ..component.Attack import Attack
 from ..component.Faction import Faction
+from ..component.Coin import Coin
 from ..system.MovementSystem import MovementSystem
 from ..system.AttackSystem import AttackSystem
 from ..system.SpawnSystem import SpawnSystem
+from ..system.PlayerDamage import PlayerDamage
 from ..Map import Map, PathType
 
 
@@ -36,10 +38,18 @@ class TestECS(unittest.TestCase):
         ecsm.registerComponent(Vital)
         ecsm.registerComponent(Attack)
         ecsm.registerComponent(Faction)
+        ecsm.registerComponent(Coin)
 
         ecsm.registerSystem(MovementSystem, LocationCartesian, Movement)
         ecsm.registerSystem(AttackSystem, Attack, Faction, LocationCartesian)
         ecsm.registerSystem(SpawnSystem)
+        ecsm.registerSystem(PlayerDamage, Faction, LocationCartesian, Vital)
+
+        player = ecsm.createEntity()
+        ecsm.addEntityComponent(player, Vital(100, 0))
+        ecsm.addEntityComponent(player, Coin(100))
+        ecsm.addEntityComponent(player, Faction(1))
+        state.player = player
 
         # Make mobs
         self.orig_coords = [(0.15, 0.2), (0.2, 0.2)]
@@ -65,7 +75,7 @@ class TestECS(unittest.TestCase):
         state.entities[tower_ent.ID] = tower_ent
 
         # build tree
-        state.dynamicTree.add(EntityPoint2D(*self.orig_coords[0], entity=state.entities[0]))
+        state.dynamicTree.add(EntityPoint2D(*self.orig_coords[0], entity=state.entities[1]))
         state.staticTree.add(EntityPoint2D(tower_node.x, tower_node.y, entity=tower_ent))
 
         self.state = state
@@ -118,3 +128,18 @@ class TestECS(unittest.TestCase):
             self.assertEqual(self.n1.y, locComp.y)
             self.assertEqual(self.n1.id, moveComp.fromNode)
             self.assertEqual(self.n2.id, moveComp.destNode)
+
+    def test_damage(self):
+        pd = self.ecsm.getSystem(PlayerDamage)
+
+        ent = self.ecsm.createEntity()
+        self.ecsm.addEntityComponent(ent, LocationCartesian(self.n2.x, self.n2.y))
+        self.ecsm.addEntityComponent(ent, Vital(100, 10))
+        self.ecsm.addEntityComponent(ent, Movement(0.3, self.n1.id, self.n2.id))
+        self.ecsm.addEntityComponent(ent, Attack(attackRange=0.01, attackSpeed=2, dmg=5, target=None, attackable=True))
+        self.ecsm.addEntityComponent(ent, Faction(faction=0))
+
+        pd.update(0, self.state, self.ecsm)
+
+        player_vital_comp = self.ecsm.getEntityComponent(self.state.player, Vital)
+        self.assertEqual(player_vital_comp.health, 90)
