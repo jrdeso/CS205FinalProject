@@ -9,16 +9,13 @@ class MainMenu(UI):
         # init pygame
         pygame.init()
         pygame.display.set_caption("Tower Defense")
-        font = pygame.font.Font('freesansbold.ttf', 72)
+
         surface = pygame.display.set_mode(resolution)
         background = pygame.Surface(resolution)
-        background.fill(pygame.Color((192, 192, 192)))
+        background.fill(pygame.Color((100, 100, 100)))
 
-        WELCOME = font.render("Tower Defense", True, (252, 252, 252))  # color - white
 
-        surface.blit(WELCOME, (int(resolution[0] / 5), int(resolution[1] / 4)))  # current hardcoded coordinates
-
-        super().__init__(resolution)
+        super().__init__(resolution, surface, background)
 
         #while True:
         #    pygame.display.update()
