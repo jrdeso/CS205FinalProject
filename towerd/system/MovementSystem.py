@@ -1,8 +1,10 @@
 import math
+import random
 
 from towerd.System import System
 from towerd.component.Movement import Movement
 from towerd.component.LocationCartesian import LocationCartesian
+from towerd.Map import PathType
 
 
 class MovementSystem(System):
@@ -58,3 +60,12 @@ class MovementSystem(System):
                 locComp.y = newY
             else:
                 locComp.y = destY
+
+
+            # Get list of neighboring nodes?
+            neighboringNodes = state.map.map[destNode.ID]
+
+            # If the entity is at the destination node, update to next destination node
+            if(locComp.x == destNode.x and locComp.y == destNode.y):
+                newDestNode = random.choice(neighboringNodes)
+                locComp.destNode = newDestNode
