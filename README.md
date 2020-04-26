@@ -15,6 +15,10 @@ optional arguments:
   --height HEIGHT  Height of the window
 ```
 
+### Game
+
+`Q - Click` on a purple node to place a tower.
+ 
 ## Development
 
 Install requirements using
