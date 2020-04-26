@@ -62,13 +62,10 @@ class MovementSystem(System):
                 locComp.y = destY
 
 
-            # Get possible destination nodes
-            pathEndNodes = []
-            for nodeID, mapNode in state.map.nodes.items():
-                if mapNode.pathType == PathType.PATH_END:
-                    pathEndNodes.append(mapNode)
+            # Get list of neighboring nodes?
+            neighboringNodes = state.map.map[destNode.ID]
 
             # If the entity is at the destination node, update to next destination node
             if(locComp.x == destNode.x and locComp.y == destNode.y):
-                newDestNode = random.choice(pathEndNodes)
+                newDestNode = random.choice(neighboringNodes)
                 locComp.destNode = newDestNode
