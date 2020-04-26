@@ -1,7 +1,6 @@
 import pygame
 
 from towerd.System import System
-from towerd.component.Faction import Faction
 from towerd.component.LocationCartesian import LocationCartesian
 from towerd.component.Sprite import Sprite
 
@@ -14,13 +13,11 @@ class SpriteSystem(System):
 
     def update(self, dt, state, ecs_manager):
         locComps = ecs_manager.getComponentArr(LocationCartesian)
-        factionComps = ecs_manager.getComponentArr(Faction)
         spriteComps = ecs_manager.getComponentArr(Sprite)
 
         # update locations for each entity - add all sprites to the group
         for entity in self.entities:
             locComp = locComps[entity.ID]
-            factionComp = factionComps[entity.ID]
             spriteComp = spriteComps[entity.ID]
 
             if entity.ID not in self.entitySprite:
