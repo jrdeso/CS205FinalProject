@@ -15,7 +15,6 @@ class AttackSystem(System):
         vitalComps = ecs_manager.getComponentArr(Vital)
 
         for entity in self.entities:
-            dynTree = state.dynamicTree
             entityLocComp = locComps[entity.ID]
             entityAttackComp = attackComps[entity.ID]
             entityFactionComp = factionComps[entity.ID]
@@ -26,7 +25,7 @@ class AttackSystem(System):
             # If the attacker doesn't already have a target, set the target to
             # be the nearest, in-range entity of the opposite faction
             if not entityAttackComp.target:
-                ep2ds = dynTree.search_nn_dist(
+                ep2ds = state.dynamicTree.search_nn_dist(
                     (entityLocComp.x, entityLocComp.y), entityAttackComp.attackRange
                 )
                 ep2ds = sorted(
