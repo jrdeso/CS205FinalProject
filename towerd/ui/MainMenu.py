@@ -21,6 +21,14 @@ class MainMenu(UI):
             text="Start",
             manager=self.manager,
         )
+
+        # Button to quit game
+        self.quitButton = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((700, 0), (100, 50)),
+            text="Quit",
+            manager=self.manager,
+        )
+
         self.blits = [
             (background, (0, 0)),
             (welcomeMessage, (int(resolution[0] / 5), int(resolution[1] / 4))),
@@ -32,3 +40,6 @@ class MainMenu(UI):
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.startButton:
                     return (GameEvent.START, R_PATHS.map.default)
+                if event.ui_element == self.quitButton:
+                    exit(0)
+            return None, None
