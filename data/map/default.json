@@ -1,60 +1,60 @@
 {
     "0": {
         "type": "path_start",
-        "coord": [0.1, 0.1],
+        "coord": [10, 10],
         "edges": [
             "1"
         ]
     },
     "1": {
         "type": "path",
-        "coord": [0.3, 0.1],
+        "coord": [30, 10],
         "edges": [
             "2"
         ]
     },
     "2": {
         "type": "path",
-        "coord": [0.3, 0.5],
+        "coord": [30, 50],
         "edges": [
             "4"
         ]
     },
     "3": {
         "type": "path_start",
-        "coord": [0.1, 0.5],
+        "coord": [10, 50],
         "edges": [
             "2"
         ]
     },
     "4": {
         "type": "path_end",
-        "coord": [0.3, 0.7],
+        "coord": [30, 70],
         "edges": []
     },
     "6": {
         "type": "tower",
-        "coord": [0.2, 0.2],
+        "coord": [20, 20],
         "edges": []
     },
     "7": {
         "type": "tower",
-        "coord": [0.4, 0.1],
+        "coord": [40, 10],
         "edges": []
     },
     "8": {
         "type": "tower",
-        "coord": [0.4, 0.3],
+        "coord": [40, 30],
         "edges": []
     },
     "9": {
         "type": "tower",
-        "coord": [0.4, 0.5],
+        "coord": [40, 50],
         "edges": []
     },
     "10": {
         "type": "tower",
-        "coord": [0.4, 0.7],
+        "coord": [40, 70],
         "edges": []
     }
 }
