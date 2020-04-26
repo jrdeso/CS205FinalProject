@@ -1,9 +1,6 @@
 {
-    "class": "tower",
-    "attributes": {
-        "type": "archer",
-        "damage": 3,
-        "attack_speed": 1,
-        "attack_range": 0.1
-    }
+    "type": "archer",
+    "damage": 3,
+    "attack_speed": 1,
+    "attack_range": 0.1
 }

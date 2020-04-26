@@ -21,36 +21,52 @@ class Resources:
     print(resources.text['test1'])  # in case an identifier contains a space
     """
 
-    def __init__(self, filepath, gatherFromDir=False):
-        self.pathDir = os.path.dirname(filepath)
-        with open(filepath) as f:
-            mapping = "".join([line.strip() for line in f.readlines()])
-        self._addMapping(mapping)
+    def __init__(self, resourcePath, mapFromFile=False, mapFromDir=False, nameMap=False):
+        self.pathDir = os.path.dirname(resourcePath)
+        with open(resourcePath) as f:
+            self.mapping = "".join([line.strip() for line in f.readlines()])
 
-        if gatherFromDir:
-            self._gather()
+        if mapFromFile:
+            self.mapFromFile(self.mapping)
 
-    def _addMapping(self, mapping):
+        if mapFromDir:
+            self.mapFromDir()
+
+        if nameMap:
+            self._nameMap()
+
+    def mapFromFile(self, mapping):
         try:
             resources = json.loads(mapping)
         except json.JSONDecodeError:
             warnings.warn(
-                "No resources found. Try again with Resources._addMapping(mapping)."
+                "No resources found. Try again with Resources._mapFromFile(mapping)."
             )
             resources = []
 
         for resource in resources:
             _, category = resource.keys()
-            categoryDict = getattr(self, category, None)
+            self._setInternal(resource['path'], resource[category], category)
 
-            if not categoryDict:
-                setattr(self, category, ResourceNamespace())
-                categoryDict = getattr(self, category)
+    def mapFromDir(self):
+        walker = os.walk(self.pathDir)
+        for (dirpath, dirnames, filenames) in walker:
+            for filename in filenames:
+                reference, _ = os.path.splitext(filename)
+                category = os.path.basename(dirpath)
+                self._setInternal(os.path.join(category, filename), reference, category)
 
-            reference = resource[category]
-            categoryDict[reference] = os.path.join(self.pathDir, resource["path"])
+    def _setInternal(self, path, reference, category):
+        categoryDict = getattr(self, category, None)
 
-    def _gather(self):
+        if not categoryDict:
+            setattr(self, category, ResourceNamespace())
+            categoryDict = getattr(self, category)
+
+        reference = reference
+        categoryDict[reference] = os.path.join(self.pathDir, path)
+
+    def _nameMap(self):
         contents = {}
         walker = os.walk(self.pathDir)
         for (dirpath, dirnames, filenames) in walker:
