@@ -290,9 +290,10 @@ class Game:
             self.handleInput()
 
             if not self.state.waveInProgress:
-                spawnSystem.update(dt, self.state, self.ecsm)
+                spawnSystem.addWave(self.state.wave)
                 self.state.waveInProgress = True
 
+            spawnSystem.update(dt, self.state, self.ecsm)
             movementSystem.update(dt, self.state, self.ecsm)
             attackSystem.update(dt, self.state, self.ecsm)
             spriteSystem.update(dt, self.state, self.ecsm)

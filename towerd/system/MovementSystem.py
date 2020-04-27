@@ -57,18 +57,18 @@ class MovementSystem(System):
             dy = dl * math.sin(theta)
 
             if fromX < destX and (newX := fromX + dx) < destX:
-                locComp.x = int(newX)
+                locComp.x = newX
             elif fromX > destX and (newX := fromX - dx) > destX:
-                locComp.x = int(newX)
+                locComp.x = newX
             else:
-                locComp.x = int(destX)
+                locComp.x = destX
 
             if fromY < destY and (newY := fromY + dy) < destY:
-                locComp.y = int(newY)
+                locComp.y = newY
             elif fromY > destY and (newY := fromY - dy) > destY:
-                locComp.y = int(newY)
+                locComp.y = newY
             else:
-                locComp.y = int(destY)
+                locComp.y = destY
 
             ep2d = EntityPoint2D(locComp.x, locComp.y, entity)
             state.dynamicTree.add(ep2d)

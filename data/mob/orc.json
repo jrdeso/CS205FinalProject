@@ -4,6 +4,6 @@
     "damage": 2,
     "attack_speed": 1,
     "attack_range": 0.01,
-    "movement_speed": 0.1,
+    "movement_speed": 0.01,
     "coins": 10
 }
