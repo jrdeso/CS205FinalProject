@@ -16,10 +16,8 @@ class RemoveDeadEntitiesSystem(System):
                 vitalComp = vitalComps[entity.ID]
             except KeyError:
                 continue
-            print('removing', entity, vitalComp)
 
             if vitalComp.health <= 0:
-                print('removed', entity, vitalComp)
                 # The entity is dead, remove it from self.entites
                 self.entities.remove(entity)
 
