@@ -10,10 +10,7 @@ class GameUI(UI):
         background = pygame.Surface(resolution)
         background.fill(pygame.Color((100, 100, 100)))
 
-        font = pygame.font.Font("freesansbold.ttf", 72)
-        # welcomeMessage = font.render(
-        #     "Tower Defense", True, (252, 252, 252)
-        # )
+        self.font = pygame.font.Font("freesansbold.ttf", 72)
 
         # button to spawn new wave
         self.nextWave = pygame_gui.elements.UIButton(
@@ -29,9 +26,7 @@ class GameUI(UI):
             manager=self.manager,
         )
 
-        self.blits = [
-            (background, (0, 0)),  # Got rid of welcome message from this UI
-        ]
+        self.blits = []
 
     def handleEvent(self, event):
         from towerd.Game import GameEvent, R_PATHS
@@ -41,5 +36,17 @@ class GameUI(UI):
                     exit(0)
                 if event.ui_element == self.nextWave:
                     # TODO: Call new wave through game
-                    pass
+                    return GameEvent.NEXT_WAVE, None
             return None, None
+
+    def draw(self, screen, state):
+        super().draw(screen, state)
+        healthText = self.font.render(
+            f"Player 1: {state.player}", True, (252, 252, 252)
+        )
+        waveText = self.font.render(
+            f"Wave: {state.wave}", True, (252, 252, 252)
+        )
+        width, height = screen.get_size()
+        screen.blit(healthText, (width, height - 100))
+        screen.blit(waveText, (width, height - 50))
