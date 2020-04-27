@@ -38,6 +38,7 @@ def processJson(filepath):
 class GameEvent(enum.IntEnum):
     START = enum.auto()
     QUIT = enum.auto()
+    NEXT_WAVE = enum.auto()
 
 
 class GameEntityType(enum.IntEnum):
@@ -50,6 +51,7 @@ class GameEntityType(enum.IntEnum):
 class GameState:
     def __init__(self):
         self.player = None
+        self.playerVital = None
 
         self.entities = {}
         self.dynamicTree = kdtree.create(dimensions=2)
@@ -179,6 +181,7 @@ class Game:
         self.ecsm.addEntityComponent(player, Faction(player_id))
 
         self.state.player[player_id] = player
+        self.state.playerVital = self.ecsm.getEntityComponent(player, Vital)
 
     def setupGameState(self, jsonMap):
         self.state = GameState()
@@ -224,9 +227,7 @@ class Game:
             self.curInterface.processEvents(event)
             self.curInterface.update(dt)
 
-            for item, args in self.curInterface.blits:
-                self.win.blit(item, args)
-            self.curInterface.drawUI(self.win)
+            self.curInterface.draw(self.win, state)
 
             pygame.display.update()
 
@@ -250,8 +251,5 @@ class Game:
             movementSystem.update(dt, self.state, self.ecsm)
             attackSystem.update(dt, self.state, self.ecsm)
 
-            self.draw()
+            self.curInterface.draw(self.win, self.state)
             dt = clock.tick(60)
-
-    def draw(self):
-        pass
